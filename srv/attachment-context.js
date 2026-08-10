@@ -1,6 +1,11 @@
 const { PDFParse } = require("pdf-parse");
 const mammoth = require("mammoth");
 
+const {
+    DEFAULT_LIMITS,
+    estimateTextTokens
+} = require("./conversation-context");
+
 const MAX_ATTACHMENT_COUNT = 5;
 const MAX_FILE_BYTES = 5 * 1024 * 1024;
 const MAX_TOTAL_BYTES = 10 * 1024 * 1024;
@@ -15,11 +20,36 @@ const IMAGE_MIME_TYPES = new Set([
 
 class AttachmentContextError extends Error {}
 
-async function buildAttachmentContext(serializedAttachments) {
+async function buildAttachmentContext(
+    serializedAttachments,
+    options = {}
+) {
     const attachments = parseAttachments(serializedAttachments);
     const normalized = normalizeAndValidate(attachments);
     const textSections = [];
     const imageParts = [];
+
+    const maxTokens = normalizePositiveInteger(
+        options.maxTokens,
+        DEFAULT_LIMITS.maxAttachmentTokens
+    );
+
+    const imageTokenEstimate = normalizePositiveInteger(
+        options.imageTokenEstimate,
+        DEFAULT_LIMITS.imageTokenEstimate
+    );
+
+    const imageCount = normalized.filter(function (attachment) {
+        return IMAGE_MIME_TYPES.has(attachment.mimeType);
+    }).length;
+
+    let remainingTextTokens = Math.max(
+        0,
+        maxTokens - imageCount * imageTokenEstimate
+    );
+
+    let remainingTextFiles = normalized.length - imageCount;
+    let estimatedTextTokens = 0;
 
     for (const attachment of normalized) {
         if (IMAGE_MIME_TYPES.has(attachment.mimeType)) {
@@ -46,13 +76,35 @@ async function buildAttachmentContext(serializedAttachments) {
             );
         }
 
-        textSections.push(
-            createTextMarker(attachment, extractedText)
+        const sectionBudget = remainingTextFiles > 0
+            ? Math.floor(
+                remainingTextTokens /
+                remainingTextFiles
+            )
+            : 0;
+
+        const section = createBudgetedTextMarker(
+            attachment,
+            extractedText,
+            sectionBudget
         );
+
+        const sectionTokens = estimateTextTokens(section);
+
+        textSections.push(section);
+        estimatedTextTokens += sectionTokens;
+        remainingTextTokens = Math.max(
+            0,
+            remainingTextTokens - sectionTokens
+        );
+        remainingTextFiles -= 1;
     }
 
     return {
         attachmentCount: normalized.length,
+        estimatedTokens:
+            imageCount * imageTokenEstimate +
+            estimatedTextTokens,
         imageParts: imageParts,
         textContext: textSections.length > 0
             ? textSections.join("\n\n")
@@ -194,6 +246,38 @@ function createTextMarker(attachment, text) {
     ].join("\n");
 }
 
+function createBudgetedTextMarker(
+    attachment,
+    text,
+    tokenBudget
+) {
+    const emptyMarker = createTextMarker(
+        attachment,
+        ""
+    );
+
+    const markerTokens = estimateTextTokens(emptyMarker);
+    const availableChars = Math.max(
+        0,
+        (tokenBudget - markerTokens) *
+            DEFAULT_LIMITS.charsPerToken
+    );
+
+    const content = truncateToChars(
+        text,
+        Math.min(
+            MAX_TEXT_CHARS_PER_FILE,
+            availableChars
+        )
+    );
+
+    return createTextMarker(
+        attachment,
+        content ||
+        "[Obsah přílohy byl vynechán kvůli limitu kontextu.]"
+    );
+}
+
 function isPdf(attachment) {
     return (
         attachment.mimeType === "application/pdf" ||
@@ -313,6 +397,38 @@ function truncate(value) {
         text.slice(0, MAX_TEXT_CHARS_PER_FILE) +
         "\n[Obsah přílohy byl zkrácen kvůli limitu kontextu.]"
     );
+}
+
+function truncateToChars(value, maxChars) {
+    const text = String(value || "").trim();
+
+    if (maxChars <= 0) {
+        return "";
+    }
+
+    if (text.length <= maxChars) {
+        return text;
+    }
+
+    const marker =
+        "\n[Obsah přílohy byl zkrácen kvůli limitu kontextu.]";
+
+    if (maxChars <= marker.length) {
+        return text.slice(0, maxChars);
+    }
+
+    return (
+        text.slice(0, maxChars - marker.length) +
+        marker
+    );
+}
+
+function normalizePositiveInteger(value, fallback) {
+    const number = Number(value);
+
+    return Number.isFinite(number) && number > 0
+        ? Math.trunc(number)
+        : fallback;
 }
 
 module.exports = {

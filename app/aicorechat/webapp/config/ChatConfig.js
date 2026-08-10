@@ -42,6 +42,9 @@ sap.ui.define([], function () {
         MAX_CHAT_TITLE_LENGTH:
             100,
 
+        MAX_CONTEXT_CANDIDATE_MESSAGES:
+            40,
+
         ROLE_USER:
             "USER",
 

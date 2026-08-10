@@ -86,6 +86,9 @@ sap.ui.define([
                     prompt ||
                     "Analyzuj prosím přiložené soubory.";
 
+                var conversationHistory =
+                    this._getConversationHistory();
+
                 viewModel.setProperty(
                     "/prompt",
                     ""
@@ -112,7 +115,8 @@ sap.ui.define([
                             ._aiService
                             .ask(
                                 submittedPrompt,
-                                attachments
+                                attachments,
+                                conversationHistory
                             );
 
                     this._addMessage(
@@ -659,6 +663,27 @@ sap.ui.define([
                     )
                         ? attachments.slice()
                         : [];
+                },
+
+            _getConversationHistory:
+                function () {
+                    var messages =
+                        this.getView()
+                            .getModel("chat")
+                            .getProperty(
+                                "/ChatMessages"
+                            ) || [];
+
+                    return messages.map(
+                        function (message) {
+                            return {
+                                role:
+                                    message.displayRole,
+                                content:
+                                    message.content
+                            };
+                        }
+                    );
                 },
 
             _setBusy:

@@ -10,13 +10,18 @@ sap.ui.define([
                 window.fetch.bind(window);
         }
 
-        async ask(prompt, attachments) {
+        async ask(prompt, attachments, history) {
             var normalizedPrompt =
                 String(prompt || "").trim();
 
             var normalizedAttachments =
                 this._normalizeAttachments(
                     attachments
+                );
+
+            var normalizedHistory =
+                this._normalizeHistory(
+                    history
                 );
 
             if (
@@ -42,6 +47,10 @@ sap.ui.define([
                         attachments:
                             JSON.stringify(
                                 normalizedAttachments
+                            ),
+                        history:
+                            JSON.stringify(
+                                normalizedHistory
                             )
                     })
                 }
@@ -149,6 +158,49 @@ sap.ui.define([
             );
         }
 
+        _normalizeHistory(history) {
+            if (!Array.isArray(history)) {
+                return [];
+            }
+
+            return history
+                .slice(
+                    -ChatConfig
+                        .MAX_CONTEXT_CANDIDATE_MESSAGES
+                )
+                .map(function (message) {
+                    var role = String(
+                        message.role ||
+                        message.displayRole ||
+                        ""
+                    ).toUpperCase();
+
+                    if (role === "MACHINE") {
+                        role = ChatConfig
+                            .ROLE_ASSISTANT;
+                    }
+
+                    if (
+                        role !== ChatConfig.ROLE_USER &&
+                        role !== ChatConfig.ROLE_ASSISTANT
+                    ) {
+                        return null;
+                    }
+
+                    var content = String(
+                        message.content || ""
+                    ).trim();
+
+                    return content
+                        ? {
+                            role: role,
+                            content: content
+                        }
+                        : null;
+                })
+                .filter(Boolean);
+        }
+
         async _readPayload(response) {
             var text =
                 await response.text();
@@ -193,6 +245,18 @@ sap.ui.define([
                 completionTokens:
                     this._normalizeTokenCount(
                         result.completionTokens
+                    ),
+                contextMessagesUsed:
+                    this._normalizeTokenCount(
+                        result.contextMessagesUsed
+                    ),
+                contextMessagesDropped:
+                    this._normalizeTokenCount(
+                        result.contextMessagesDropped
+                    ),
+                estimatedContextTokens:
+                    this._normalizeTokenCount(
+                        result.estimatedContextTokens
                     )
             };
         }

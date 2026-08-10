@@ -5,6 +5,9 @@ service AICoreService {
         reply            : LargeString;
         promptTokens     : Integer;
         completionTokens : Integer;
+        contextMessagesUsed    : Integer;
+        contextMessagesDropped : Integer;
+        estimatedContextTokens : Integer;
     }
 
     type ChatTitleResult {
@@ -13,7 +16,8 @@ service AICoreService {
 
     action askAI(
         prompt      : LargeString,
-        attachments : LargeString
+        attachments : LargeString,
+        history     : LargeString
     ) returns AIResult;
 
     action generateChatTitle(

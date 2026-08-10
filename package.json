@@ -21,6 +21,7 @@
     "start": "cds-serve",
     "dev:backend": "cds watch --port 4004",
     "dev:frontend": "npm run start --workspace=aicorechat",
+    "test": "node --test test/*.test.js",
     "undeploy": "cf undeploy aicore_api --delete-services --delete-service-keys --delete-service-brokers",
     "build": "rimraf resources mta_archives && mbt build --mtar archive",
     "deploy": "cf deploy mta_archives/archive.mtar --retries 1"
