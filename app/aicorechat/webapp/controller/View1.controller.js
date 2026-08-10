@@ -31,6 +31,7 @@ sap.ui.define([
             onInit: function () {
                 this._initializeModels();
                 this._initializeServices();
+                this._attachPromptKeyboardHandler();
 
                 this._loadHistory().catch(
                     function (error) {
@@ -43,6 +44,14 @@ sap.ui.define([
             },
 
             onExit: function () {
+                if (this._promptKeyDownHandler) {
+                    this.byId("chatInput")
+                        .detachBrowserEvent(
+                            "keydown",
+                            this._promptKeyDownHandler
+                        );
+                }
+
                 if (this._sessionDialogService) {
                     this._sessionDialogService
                         .destroy();
@@ -634,6 +643,40 @@ sap.ui.define([
                     return context
                         ? context.getObject()
                         : null;
+                },
+
+            _attachPromptKeyboardHandler:
+                function () {
+                    this._promptKeyDownHandler =
+                        this._onPromptKeyDown.bind(this);
+
+                    this.byId("chatInput")
+                        .attachBrowserEvent(
+                            "keydown",
+                            this._promptKeyDownHandler
+                        );
+                },
+
+            _onPromptKeyDown:
+                function (event) {
+                    if (
+                        event.key !== "Enter" ||
+                        event.shiftKey ||
+                        event.isComposing
+                    ) {
+                        return;
+                    }
+
+                    event.preventDefault();
+
+                    var sendButton =
+                        this.byId(
+                            "sendMessageButton"
+                        );
+
+                    if (sendButton.getEnabled()) {
+                        sendButton.firePress();
+                    }
                 },
 
             _getPrompt: function (

@@ -66,7 +66,7 @@ body.sapUiBody {
 .historyChatButton .sapMBtnInner {
     justify-content: flex-start !important;
     height: 2.5rem !important;
-    padding-right: 4.75rem !important;
+    padding: 0 0.5rem !important;
     border: 0 !important;
     color: #1d2d3e;
     background: transparent !important;
@@ -93,33 +93,25 @@ body.sapUiBody {
 }
 
 .chatHistoryRow {
-    position: relative;
     min-width: 0;
-    overflow: hidden;
     border-radius: 0.65rem;
+    background: transparent;
+    transition: background 0.15s ease;
 }
 
-.chatHistoryRow:hover .historyChatButton .sapMBtnInner,
-.chatHistoryRow:focus-within .historyChatButton .sapMBtnInner {
+.chatHistoryRow:hover,
+.chatHistoryRow:focus-within {
     background: #f2f5f7 !important;
 }
 
 .chatHistoryActions {
-    position: absolute;
-    top: 50%;
-    right: 0.25rem;
-    z-index: 1;
+    flex: 0 0 4.125rem;
     gap: 0.125rem;
-    padding-left: 1rem;
+    width: 4.125rem !important;
+    box-sizing: border-box;
+    padding-right: 0.125rem;
     opacity: 0;
     pointer-events: none;
-    background: linear-gradient(
-        90deg,
-        rgba(242, 245, 247, 0) 0%,
-        #f2f5f7 28%,
-        #f2f5f7 100%
-    );
-    transform: translateY(-50%);
     transition: opacity 0.15s ease;
 }
 
@@ -440,23 +432,41 @@ body.sapUiBody {
 
 .chatComposer {
     display: flex !important;
-    gap: 0.5rem;
+    align-items: flex-end !important;
+    gap: 0.4rem;
     width: 100% !important;
+    min-height: 3.1rem;
     box-sizing: border-box;
-    padding: 0.5rem 0.625rem 0.625rem;
+    padding: 0.4rem 0.5rem;
     background: #ffffff;
 }
 
-.attachmentUploader {
+.attachmentUploader,
+.sendMessageButton {
     flex: 0 0 auto;
+    width: 2.25rem !important;
+    height: 2.25rem !important;
+}
+
+.attachmentUploader .sapMBtnInner,
+.sendMessageButton .sapMBtnInner {
+    min-width: 2.25rem !important;
+    width: 2.25rem !important;
+    height: 2.25rem !important;
+    padding: 0 !important;
+    border: 1px solid transparent !important;
+    border-radius: 50% !important;
 }
 
 .attachmentUploader .sapMBtnInner {
-    min-width: 2.5rem !important;
-    height: 2.5rem !important;
-    border: 1px solid transparent !important;
-    border-radius: 0.75rem !important;
     background: #f2f5f7 !important;
+}
+
+.attachmentUploader .sapMBtnIcon,
+.sendMessageButton .sapMBtnIcon {
+    width: 2.25rem !important;
+    line-height: 2.25rem !important;
+    font-size: 0.9rem !important;
 }
 
 .attachmentUploader .sapMBtnIcon {
@@ -468,27 +478,43 @@ body.sapUiBody {
     background: #eaf4ff !important;
 }
 
+.composerUserIcon {
+    display: flex !important;
+    flex: 0 0 2.25rem;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem !important;
+    height: 2.25rem !important;
+    box-sizing: border-box;
+    border: 1px solid #b8d8f8;
+    border-radius: 50%;
+    color: #0a6ed1 !important;
+    background: #eaf4ff;
+    font-size: 0.9rem !important;
+}
+
 .chatInput {
+    flex: 1 1 auto;
+    min-width: 0;
     width: 100% !important;
     max-width: none !important;
     margin: 0 !important;
 }
 
 .chatInput .sapMInputBaseContentWrapper {
-    min-height: 2.75rem;
+    min-height: 2.25rem;
     border: 0 !important;
-    border-radius: 0.75rem !important;
+    border-radius: 0.65rem !important;
     background: #ffffff;
     box-shadow: none !important;
 }
 
-.chatInput .sapMInputBaseInner {
-    padding-left: 0.75rem;
-    padding-right: 0.75rem;
-}
-
-.chatInput .sapMBtnInner {
-    border-radius: 50% !important;
+.chatInput .sapMTextAreaInner {
+    min-height: 2.25rem !important;
+    padding: 0.42rem 0.65rem !important;
+    border: 0 !important;
+    line-height: 1.35 !important;
+    resize: none !important;
 }
 
 li.sapMLIB:focus,

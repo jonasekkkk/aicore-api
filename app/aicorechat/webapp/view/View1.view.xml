@@ -301,12 +301,10 @@
                             </HBox>
 
                             <HBox
-                            
                                 id="chatComposer"
                                 width="100%"
-                                alignItems="Center"
+                                alignItems="End"
                                 class="chatComposer">
-                                
 
                                 <u:FileUploader
                                     id="attachmentUploader"
@@ -319,18 +317,23 @@
                                     style="Transparent"
                                     class="attachmentUploader"
                                     buttonText=" " />
-                                    
 
+                                <core:Icon
+                                    id="composerUserIcon"
+                                    src="sap-icon://person-placeholder"
+                                    decorative="false"
+                                    tooltip="Uživatel"
+                                    class="composerUserIcon" />
 
-                                <FeedInput
+                                <TextArea
                                     id="chatInput"
-                                    post=".onPostMessage"
                                     placeholder="Napište zprávu nebo přiložte soubor..."
                                     enabled="{= !${view>/isBusy} &amp;&amp; !${view>/isReadingAttachments} }"
                                     value="{view>/prompt}"
+                                    valueLiveUpdate="true"
                                     rows="1"
                                     growing="true"
-                                    growingMaxLines="4"
+                                    growingMaxLines="6"
                                     class="chatInput">
 
                                     <layoutData>
@@ -339,7 +342,16 @@
                                             growFactor="1"
                                             shrinkFactor="1" />
                                     </layoutData>
-                                </FeedInput>
+                                </TextArea>
+
+                                <Button
+                                    id="sendMessageButton"
+                                    icon="sap-icon://paper-plane"
+                                    type="Emphasized"
+                                    tooltip="Odeslat zprávu"
+                                    enabled="{= !${view>/isBusy} &amp;&amp; !${view>/isReadingAttachments} }"
+                                    press=".onPostMessage"
+                                    class="sendMessageButton" />
                             </HBox>
                         </VBox>
                     </VBox>
