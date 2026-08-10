@@ -1,0 +1,19 @@
+{
+  "name": "aicorechat",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "fiori run --open \"index.html?sap-ui-xx-viewCache=false\"",
+    "start:plain": "fiori run --open index.html",
+    "build": "ui5 build --config ui5.yaml --clean-dest"
+  },
+  "devDependencies": {
+    "@sap/ux-ui5-tooling": "1.30.0",
+    "@ui5/cli": "4.0.60"
+  },
+  "ui5": {
+    "dependencies": [
+      "@sap/ux-ui5-tooling"
+    ]
+  }
+}

@@ -1,0 +1,310 @@
+<mvc:View
+    controllerName="aicore.aicorechat.controller.View1"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:u="sap.ui.unified"
+    displayBlock="true">
+
+    <Page
+        id="chatPage"
+        title="AI Asistent"
+        titleAlignment="Center"
+        enableScrolling="false"
+        class="chatPageContent">
+
+        <headerContent>
+                <u:FileUploader
+                id="knowledgeBaseUploader"
+                buttonOnly="true"
+                icon="sap-icon://upload-to-cloud"
+                multiple="false"
+                tooltip="Nahrát dokument do firemní AI databáze"
+                change=".onUploadToDatabase"
+                style="Emphasized"
+                class="sapUiSmallMarginEnd"
+                buttonText="Nahrát" />
+        </headerContent>
+
+        <content>
+            <HBox
+                id="chatShell"
+                fitContainer="true"
+                height="100%"
+                class="chatShell">
+
+                <VBox
+                    id="chatSidebar"
+                    width="17rem"
+                    height="100%"
+                    class="chatSidebar">
+
+                    <Button
+                        id="newChatButton"
+                        text="Nový chat"
+                        icon="sap-icon://add"
+                        type="Emphasized"
+                        tooltip="Založit nový chat"
+                        press=".onNewChat"
+                        class="newChatButton" />
+
+                    <Title
+                        id="chatHistoryTitle"
+                        text="Historie chatů"
+                        level="H2"
+                        class="chatSidebarTitle" />
+
+                    <List
+                        id="chatHistoryList"
+                        items="{history>/sessions}"
+                        showSeparators="None"
+                        noDataText="Zatím žádné uložené chaty"
+                        class="chatHistoryList">
+
+                        <items>
+                            <CustomListItem
+                                id="chatHistoryItem"
+                                class="chatHistoryItem">
+
+                                <Button
+                                    id="chatHistoryButton"
+                                    text="{history>title}"
+                                    type="Transparent"
+                                    tooltip="{history>tooltip}"
+                                    press=".onOpenChat"
+                                    class="historyChatButton" />
+                            </CustomListItem>
+                        </items>
+                    </List>
+                </VBox>
+
+                <VBox
+                    id="chatWorkspace"
+                    fitContainer="true"
+                    height="100%"
+                    class="chatWorkspace">
+
+                    <layoutData>
+                        <FlexItemData
+                            id="chatWorkspaceFlexData"
+                            growFactor="1"
+                            shrinkFactor="1"
+                            baseSize="0%" />
+                    </layoutData>
+
+                    <ScrollContainer
+                        id="chatScrollContainer"
+                        horizontal="false"
+                        vertical="true"
+                        width="100%"
+                        height="100%"
+                        class="chatScrollContainer">
+
+                        <layoutData>
+                            <FlexItemData
+                                id="chatScrollFlexData"
+                                growFactor="1"
+                                shrinkFactor="1"
+                                baseSize="0%" />
+                        </layoutData>
+
+                        <List
+                            id="chatList"
+                            items="{chat>/ChatMessages}"
+                            showSeparators="None"
+                            noDataText="Zatím tu nic není. Napište první zprávu!"
+                            updateFinished=".onMessagesRendered"
+                            class="chatList">
+
+                            <items>
+                                <CustomListItem
+                                    id="chatMessageItem"
+                                    class="chatMessageItem"
+                                    type="Inactive">
+
+                                    <HBox
+                                        id="chatMessageRow"
+                                        width="100%"
+                                        alignItems="Start"
+                                        class="chatMessageRow">
+
+                                        <customData>
+                                            <core:CustomData
+                                                id="chatMessageRoleData"
+                                                key="msgrole"
+                                                value="{chat>displayRole}"
+                                                writeToDom="true" />
+                                        </customData>
+
+                                        <core:Icon
+                                            id="chatMessageAvatar"
+                                            src="{= ${chat>displayRole} === 'user' ? 'sap-icon://person-placeholder' : 'sap-icon://machine' }"
+                                            decorative="false"
+                                            tooltip="{= ${chat>displayRole} === 'user' ? 'Uživatel' : 'AI asistent' }"
+                                            class="chatAvatar" />
+
+                                        <VBox
+                                            id="chatMessageBubble"
+                                            class="chatBubble">
+
+                                            <FormattedText
+                                                id="chatMessageText"
+                                                htmlText="{ path: 'chat>content', formatter: '.formatMarkdown' }"
+                                                class="chatMessageText" />
+
+                                            <HBox
+                                                id="messageAttachmentList"
+                                                items="{chat>attachments}"
+                                                wrap="Wrap"
+                                                visible="{= ${chat>attachments/length} > 0 }"
+                                                class="messageAttachmentList">
+
+                                                <items>
+                                                    <HBox
+                                                        id="messageAttachmentItem"
+                                                        alignItems="Center"
+                                                        class="messageAttachmentItem">
+
+                                                        <core:Icon
+                                                            id="messageAttachmentIcon"
+                                                            src="sap-icon://document-text"
+                                                            decorative="true"
+                                                            class="messageAttachmentIcon" />
+
+                                                        <Text
+                                                            id="messageAttachmentName"
+                                                            text="{chat>name}"
+                                                            maxLines="1"
+                                                            tooltip="{chat>name}"
+                                                            class="messageAttachmentName" />
+                                                    </HBox>
+                                                </items>
+                                            </HBox>
+
+                                            <Text
+                                                id="chatMessageTimestamp"
+                                                text="{chat>timestamp}"
+                                                visible="{= !!${chat>timestamp} }"
+                                                wrapping="false"
+                                                class="chatTimestamp" />
+                                        </VBox>
+                                    </HBox>
+                                </CustomListItem>
+                            </items>
+                        </List>
+                    </ScrollContainer>
+
+                    <VBox
+                        id="composerArea"
+                        width="100%"
+                        class="composerArea">
+
+                        <layoutData>
+                            <FlexItemData
+                                id="composerAreaFlexData"
+                                growFactor="0"
+                                shrinkFactor="0" />
+                        </layoutData>
+
+                        <VBox
+                            id="composerSurface"
+                            width="100%"
+                            class="composerSurface">
+
+                            <HBox
+                                id="attachmentList"
+                                items="{view>/attachments}"
+                                wrap="Wrap"
+                                visible="{= ${view>/attachments/length} > 0 }"
+                                class="attachmentBubbleContainer">
+
+                                <items>
+                                
+                                    <HBox
+                                        id="attachmentItem"
+                                        alignItems="Center"
+                                        class="attachmentBubble">
+
+                                        <core:Icon
+                                            id="attachmentItemIcon"
+                                            src="sap-icon://document-text"
+                                            decorative="true"
+                                            class="attachmentBubbleIcon" />
+
+                                        <VBox
+                                            id="attachmentItemDetails"
+                                            class="attachmentBubbleDetails">
+
+                                            <Text
+                                                id="attachmentItemName"
+                                                text="{view>name}"
+                                                maxLines="1"
+                                                tooltip="{view>name}"
+                                                class="attachmentBubbleName" />
+
+                                            <Text
+                                                id="attachmentItemSize"
+                                                text="{path: 'view>size', formatter: '.formatFileSize'}"
+                                                class="attachmentBubbleMeta" />
+                                                
+                                        </VBox>
+
+                                        <Button
+                                            id="removeAttachmentButton"
+                                            icon="sap-icon://decline"
+                                            type="Transparent"
+                                            press=".onRemoveAttachment"
+                                            tooltip="Odebrat přílohu"
+                                            class="attachmentRemoveButton" />
+                                    </HBox>
+                                </items>
+                            </HBox>
+
+                            <HBox
+                            
+                                id="chatComposer"
+                                width="100%"
+                                alignItems="Center"
+                                class="chatComposer">
+                                
+
+                                <u:FileUploader
+                                    id="attachmentUploader"
+                                    buttonOnly="true"
+                                    icon="sap-icon://attachment"
+                                    multiple="true"
+                                    enabled="{= !${view>/isBusy} &amp;&amp; !${view>/isReadingAttachments} }"
+                                    tooltip="Nahrát soubory"
+                                    change=".onFilesSelected"
+                                    style="Transparent"
+                                    class="attachmentUploader"
+                                    buttonText=" " />
+                                    
+
+
+                                <FeedInput
+                                    id="chatInput"
+                                    post=".onPostMessage"
+                                    placeholder="Napište zprávu nebo přiložte soubor..."
+                                    enabled="{= !${view>/isBusy} &amp;&amp; !${view>/isReadingAttachments} }"
+                                    value="{view>/prompt}"
+                                    rows="1"
+                                    growing="true"
+                                    growingMaxLines="4"
+                                    class="chatInput">
+
+                                    <layoutData>
+                                        <FlexItemData
+                                            id="chatInputFlexData"
+                                            growFactor="1"
+                                            shrinkFactor="1" />
+                                    </layoutData>
+                                </FeedInput>
+                            </HBox>
+                        </VBox>
+                    </VBox>
+                </VBox>
+            </HBox>
+        </content>
+    </Page>
+</mvc:View>

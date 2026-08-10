@@ -1,0 +1,40 @@
+{
+  "name": "aicore_api",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "@cap-js/hana": "^2",
+    "@sap/cds": "^9",
+    "@sap/xsenv": "^6.2.1",
+    "@sap/xssec": "^4",
+    "axios": "^1.19.0",
+    "mammoth": "^1.12.1",
+    "pdf-parse": "^2.4.5"
+  },
+  "devDependencies": {
+    "@cap-js/sqlite": "^2.4",
+    "@sap/cds-dk": "^9",
+    "mbt": "^1.2.49",
+    "rimraf": "^5.0.5"
+  },
+  "scripts": {
+    "start": "cds-serve",
+    "dev:backend": "cds watch --port 4004",
+    "dev:frontend": "npm run start --workspace=aicorechat",
+    "undeploy": "cf undeploy aicore_api --delete-services --delete-service-keys --delete-service-brokers",
+    "build": "rimraf resources mta_archives && mbt build --mtar archive",
+    "deploy": "cf deploy mta_archives/archive.mtar --retries 1"
+  },
+  "cds": {
+    "requires": {
+      "[production]": {
+        "auth": "xsuaa"
+      },
+      "destinations": true,
+      "html5-repo": true
+    }
+  },
+  "workspaces": [
+    "app/*"
+  ]
+}

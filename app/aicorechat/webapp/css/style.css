@@ -1,0 +1,435 @@
+html,
+body,
+#content,
+#container,
+[data-sap-ui-component] {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+}
+
+body.sapUiBody {
+    overflow: hidden;
+    background: #f5f7f9;
+}
+
+.chatPageContent .sapMPageCont {
+    padding: 0 !important;
+    overflow: hidden !important;
+}
+
+.chatShell {
+    display: flex !important;
+    height: 100% !important;
+    min-height: 0;
+    overflow: hidden;
+    background: #f5f7f9;
+}
+
+/* Levý panel s historií konverzací */
+.chatSidebar {
+    flex: 0 0 17rem;
+    min-width: 17rem;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 1rem 0.75rem;
+    border-right: 1px solid #d8e0e8;
+    background: #ffffff;
+}
+
+.chatSidebarTitle {
+    margin: 1.25rem 0.5rem 0.5rem !important;
+    color: #475e75 !important;
+    font-size: 0.8rem !important;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.newChatButton,
+.historyChatButton {
+    width: 100% !important;
+    margin-bottom: 0.35rem;
+}
+
+.newChatButton .sapMBtnInner,
+.historyChatButton .sapMBtnInner {
+    justify-content: flex-start;
+    border-radius: 0.65rem !important;
+    text-align: left;
+}
+
+.historyChatButton .sapMBtnInner {
+    justify-content: flex-start !important;
+    color: #1d2d3e;
+}
+
+.historyChatButton .sapMBtnContent {
+    width: 100%;
+    text-align: left;
+}
+
+.historyChatButtonActive .sapMBtnInner {
+    background: #eaf3fc !important;
+    color: #0a6ed1 !important;
+}
+
+.chatWorkspace {
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 0;
+    height: 100%;
+    overflow: hidden;
+}
+
+/* Rolovací část s historií chatu */
+.chatScrollContainer {
+    flex: 1 1 0 !important;
+    position: relative;
+    min-height: 0;
+    box-sizing: border-box;
+    overflow: hidden !important;
+    overscroll-behavior: contain;
+}
+
+.chatScrollContainer .sapMScrollContScroll {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 1.25rem 1.5rem 1rem;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    scrollbar-gutter: stable;
+    overscroll-behavior-y: contain;
+}
+
+.chatList,
+.chatList .sapMListUl {
+    background: transparent !important;
+}
+
+.chatMessageItem.sapMLIB,
+.chatMessageItem .sapMLIBContent {
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+}
+
+/* Jeden řádek zprávy: avatar + jediná bublina */
+.chatMessageRow {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 0.75rem;
+    box-sizing: border-box;
+    margin-bottom: 1rem;
+}
+
+/* Uživatel: zpráva vlevo od avataru, avatar vpravo */
+.chatMessageRow[data-msgrole="user"] {
+    flex-direction: row-reverse !important;
+    padding-left: 20%;
+}
+
+/* Robot: avatar vlevo, zpráva vpravo */
+.chatMessageRow[data-msgrole="machine"] {
+    flex-direction: row !important;
+    padding-right: 20%;
+}
+
+/* Avatary */
+.chatAvatar {
+    display: flex !important;
+    flex: 0 0 2.5rem;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem !important;
+    height: 2.5rem !important;
+    box-sizing: border-box;
+    border: 1px solid;
+    border-radius: 50%;
+    font-size: 1.1rem !important;
+}
+
+.chatMessageRow[data-msgrole="user"] .chatAvatar {
+    color: #0a6ed1 !important;
+    border-color: #b8d8f8;
+    background: #eaf4ff;
+}
+
+.chatMessageRow[data-msgrole="machine"] .chatAvatar {
+    color: #188918 !important;
+    border-color: #b9dfbd;
+    background: #eef9ef;
+}
+
+/* Jediná bublina obsahující zprávu i čas */
+.chatBubble {
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+    padding: 0.75rem 1rem 0.6rem;
+    border: 1px solid;
+    box-shadow: 0 2px 8px rgba(34, 53, 72, 0.08);
+}
+
+.chatMessageRow[data-msgrole="user"] .chatBubble {
+    border-color: #b8d8f8;
+    border-radius: 18px 4px 18px 18px;
+    background: #eaf4ff;
+}
+
+.chatMessageRow[data-msgrole="machine"] .chatBubble {
+    border-color: #c3e4c7;
+    border-radius: 4px 18px 18px 18px;
+    background: #edf8ee;
+}
+
+.chatMessageText {
+    display: block;
+    width: 100%;
+    color: #1d2d3e;
+    line-height: 1.45;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.messageAttachmentList {
+    display: flex !important;
+    gap: 0.35rem;
+    margin-top: 0.65rem;
+}
+
+.messageAttachmentItem {
+    max-width: 14rem;
+    box-sizing: border-box;
+    gap: 0.35rem;
+    padding: 0.3rem 0.55rem;
+    border: 1px solid rgba(10, 110, 209, 0.18);
+    border-radius: 0.55rem;
+    background: rgba(255, 255, 255, 0.68);
+}
+
+.messageAttachmentIcon {
+    flex: 0 0 auto;
+    color: #0a6ed1 !important;
+    font-size: 0.85rem !important;
+}
+
+.messageAttachmentName {
+    min-width: 0;
+    color: #24384c;
+    font-size: 0.75rem;
+}
+
+.chatTimestamp {
+    display: block;
+    margin-top: 0.35rem;
+    color: #5b738b;
+    font-size: 0.72rem;
+    line-height: 1.2;
+}
+
+.chatMessageRow[data-msgrole="user"] .chatTimestamp {
+    text-align: right;
+}
+
+.composerArea {
+    flex: 0 0 auto;
+    width: 100% !important;
+    box-sizing: border-box;
+    padding: 0.75rem 1rem 1rem;
+    border-top: 1px solid #d8e0e8;
+    background: linear-gradient(
+        180deg,
+        rgba(245, 247, 249, 0.75) 0%,
+        #f5f7f9 45%
+    );
+    box-shadow: 0 -4px 14px rgba(34, 53, 72, 0.06);
+}
+
+.composerSurface {
+    overflow: hidden;
+    box-sizing: border-box;
+    border: 1px solid #c8d4df;
+    border-radius: 1rem;
+    background: #ffffff;
+    box-shadow: 0 3px 12px rgba(34, 53, 72, 0.08);
+    transition:
+        border-color 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+.composerSurface:focus-within {
+    border-color: #0a6ed1;
+    box-shadow:
+        0 0 0 2px rgba(10, 110, 209, 0.12),
+        0 4px 14px rgba(34, 53, 72, 0.1);
+}
+
+.attachmentBubbleContainer {
+    display: flex !important;
+    gap: 0.5rem;
+    box-sizing: border-box;
+    padding: 0.75rem 0.75rem 0.25rem;
+}
+
+.attachmentBubble {
+    max-width: 18rem;
+    min-width: 9rem;
+    box-sizing: border-box;
+    gap: 0.55rem;
+    padding: 0.45rem 0.45rem 0.45rem 0.65rem;
+    border: 1px solid #d5e0ea;
+    border-radius: 0.7rem;
+    background: #f6f9fc;
+    transition:
+        border-color 0.15s ease,
+        background 0.15s ease;
+}
+
+.attachmentBubble:hover {
+    border-color: #9fc5ec;
+    background: #eef6fd;
+}
+
+.attachmentBubbleIcon {
+    flex: 0 0 auto;
+    color: #0a6ed1 !important;
+    font-size: 1rem !important;
+}
+
+.attachmentBubbleDetails {
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.attachmentBubbleName {
+    display: block;
+    max-width: 12rem;
+    color: #1d2d3e;
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.attachmentBubbleMeta {
+    color: #64788b;
+    font-size: 0.68rem;
+    line-height: 1.1;
+}
+
+.attachmentRemoveButton {
+    flex: 0 0 auto;
+}
+
+.attachmentRemoveButton .sapMBtnInner {
+    min-width: 1.75rem !important;
+    height: 1.75rem !important;
+    border: 0 !important;
+    border-radius: 50% !important;
+    background: transparent !important;
+}
+
+.attachmentRemoveButton .sapMBtnIcon {
+    color: #5b738b !important;
+    font-size: 0.7rem !important;
+    line-height: 1.7rem !important;
+}
+
+.attachmentRemoveButton:hover .sapMBtnIcon {
+    color: #bb0000 !important;
+}
+
+.chatComposer {
+    display: flex !important;
+    gap: 0.5rem;
+    width: 100% !important;
+    box-sizing: border-box;
+    padding: 0.5rem 0.625rem 0.625rem;
+    background: #ffffff;
+}
+
+.attachmentUploader {
+    flex: 0 0 auto;
+}
+
+.attachmentUploader .sapMBtnInner {
+    min-width: 2.5rem !important;
+    height: 2.5rem !important;
+    border: 1px solid transparent !important;
+    border-radius: 0.75rem !important;
+    background: #f2f5f7 !important;
+}
+
+.attachmentUploader .sapMBtnIcon {
+    color: #355b7d !important;
+}
+
+.attachmentUploader:hover .sapMBtnInner {
+    border-color: #b8d8f8 !important;
+    background: #eaf4ff !important;
+}
+
+.chatInput {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+}
+
+.chatInput .sapMInputBaseContentWrapper {
+    min-height: 2.75rem;
+    border: 0 !important;
+    border-radius: 0.75rem !important;
+    background: #ffffff;
+    box-shadow: none !important;
+}
+
+.chatInput .sapMInputBaseInner {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+}
+
+.chatInput .sapMBtnInner {
+    border-radius: 50% !important;
+}
+
+li.sapMLIB:focus,
+li.sapMLIB.sapMLIBFocused,
+.sapMLIBFocusable:focus,
+.sapMLIBActive {
+    outline: none !important;
+    border: none !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+    background: transparent !important;
+}
+
+@media (max-width: 700px) {
+    .chatSidebar {
+        display: none !important;
+    }
+
+    .chatScrollContainer .sapMScrollContScroll {
+        padding: 1rem 0.75rem 0.5rem;
+    }
+
+    .chatMessageRow[data-msgrole="user"] {
+        padding-left: 8%;
+    }
+
+    .chatMessageRow[data-msgrole="machine"] {
+        padding-right: 8%;
+    }
+
+    .composerArea {
+        padding: 0.55rem 0.65rem 0.7rem;
+    }
+
+    .attachmentBubble {
+        max-width: 100%;
+    }
+
+    .attachmentBubbleName {
+        max-width: 10rem;
+    }
+}
