@@ -45,10 +45,15 @@ body.sapUiBody {
     text-transform: uppercase;
 }
 
-.newChatButton,
-.historyChatButton {
+.newChatButton {
     width: 100% !important;
     margin-bottom: 0.35rem;
+}
+
+.historyChatButton {
+    width: 100% !important;
+    min-width: 0;
+    margin: 0 !important;
 }
 
 .newChatButton .sapMBtnInner,
@@ -60,17 +65,110 @@ body.sapUiBody {
 
 .historyChatButton .sapMBtnInner {
     justify-content: flex-start !important;
+    height: 2.5rem !important;
+    padding-right: 4.75rem !important;
+    border: 0 !important;
     color: #1d2d3e;
+    background: transparent !important;
 }
 
 .historyChatButton .sapMBtnContent {
     width: 100%;
+    overflow: hidden;
     text-align: left;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .historyChatButtonActive .sapMBtnInner {
     background: #eaf3fc !important;
     color: #0a6ed1 !important;
+}
+
+.chatHistoryItem.sapMLIB,
+.chatHistoryItem .sapMLIBContent {
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+}
+
+.chatHistoryRow {
+    position: relative;
+    min-width: 0;
+    overflow: hidden;
+    border-radius: 0.65rem;
+}
+
+.chatHistoryRow:hover .historyChatButton .sapMBtnInner,
+.chatHistoryRow:focus-within .historyChatButton .sapMBtnInner {
+    background: #f2f5f7 !important;
+}
+
+.chatHistoryActions {
+    position: absolute;
+    top: 50%;
+    right: 0.25rem;
+    z-index: 1;
+    gap: 0.125rem;
+    padding-left: 1rem;
+    opacity: 0;
+    pointer-events: none;
+    background: linear-gradient(
+        90deg,
+        rgba(242, 245, 247, 0) 0%,
+        #f2f5f7 28%,
+        #f2f5f7 100%
+    );
+    transform: translateY(-50%);
+    transition: opacity 0.15s ease;
+}
+
+.chatHistoryRow:hover .chatHistoryActions,
+.chatHistoryRow:focus-within .chatHistoryActions {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.chatActionBtn {
+    width: 2rem !important;
+    height: 2rem !important;
+    margin: 0 !important;
+}
+
+.chatActionBtn .sapMBtnInner {
+    min-width: 2rem !important;
+    height: 2rem !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0.45rem !important;
+    background: transparent !important;
+}
+
+.chatActionBtn .sapMBtnIcon {
+    width: 2rem !important;
+    line-height: 2rem !important;
+    color: #475e75 !important;
+    font-size: 0.875rem !important;
+}
+
+.renameChatButton:hover .sapMBtnInner,
+.renameChatButton:focus .sapMBtnInner {
+    background: #dceeff !important;
+}
+
+.renameChatButton:hover .sapMBtnIcon,
+.renameChatButton:focus .sapMBtnIcon {
+    color: #0a6ed1 !important;
+}
+
+.deleteChatButton:hover .sapMBtnInner,
+.deleteChatButton:focus .sapMBtnInner {
+    background: #ffeaf0 !important;
+}
+
+.deleteChatButton:hover .sapMBtnIcon,
+.deleteChatButton:focus .sapMBtnIcon {
+    color: #bb0000 !important;
 }
 
 .chatWorkspace {
@@ -431,14 +529,5 @@ li.sapMLIB.sapMLIBFocused,
 
     .attachmentBubbleName {
         max-width: 10rem;
-    }
-    .chatHistoryItem .chatActionBtn {
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 0.2s ease-in-out;
-    }
-    .chatHistoryItem:hover .chatActionBtn {
-        opacity: 1;
-        pointer-events: auto;
     }
 }

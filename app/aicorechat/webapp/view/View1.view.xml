@@ -68,7 +68,12 @@
                                 id="chatHistoryItem"
                                 class="chatHistoryItem">
 
-                                <HBox alignItems="Center" justifyContent="SpaceBetween" width="100%" wrap="NoWrap">
+                                <HBox
+                                    id="chatHistoryRow"
+                                    alignItems="Center"
+                                    width="100%"
+                                    wrap="NoWrap"
+                                    class="chatHistoryRow">
                                     <Button
                                         id="chatHistoryButton"
                                         text="{history>title}"
@@ -77,23 +82,33 @@
                                         press=".onOpenChat"
                                         class="historyChatButton sapUiNoMargin">
                                         <layoutData>
-                                            <FlexItemData growFactor="1" shrinkFactor="1" />
+                                            <FlexItemData
+                                                id="chatHistoryButtonFlexData"
+                                                growFactor="1"
+                                                shrinkFactor="1"
+                                                baseSize="0%" />
                                         </layoutData>
                                     </Button>
-                                    <HBox wrap="NoWrap" alignItems="Center">
+                                    <HBox
+                                        id="chatHistoryActions"
+                                        wrap="NoWrap"
+                                        alignItems="Center"
+                                        class="chatHistoryActions">
                                         <Button
+                                            id="renameChatButton"
                                             icon="sap-icon://edit"
                                             type="Transparent"
                                             press=".onRenameChat"
                                             tooltip="Přejmenovat konverzaci"
-                                            class="chatActionBtn sapUiTinyMarginEnd" />
-                                            
+                                            class="chatActionBtn renameChatButton" />
+
                                         <Button
+                                            id="deleteChatButton"
                                             icon="sap-icon://delete"
                                             type="Transparent"
                                             press=".onDeleteChat"
                                             tooltip="Smazat konverzaci"
-                                            class="chatActionBtn" />
+                                            class="chatActionBtn deleteChatButton" />
                                     </HBox>
 
                                 </HBox>

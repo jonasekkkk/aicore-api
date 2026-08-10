@@ -248,15 +248,6 @@ sap.ui.define([
 
             return normalizedTitle;
         }
-        async updateSessionStatus(sessionId, newStatus) {
-            // OData V4 - ID bez apostrofů
-            var path = ChatConfig.CHAT_SESSION_ENTITY_SET + "(" + sessionId + ")";
-            
-            await this._httpClient.patch(path, {
-                status: newStatus
-            });
-        }
-
         async markSessionDeleted(
             sessionId
         ) {
