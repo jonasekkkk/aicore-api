@@ -432,4 +432,13 @@ li.sapMLIB.sapMLIBFocused,
     .attachmentBubbleName {
         max-width: 10rem;
     }
+    .chatHistoryItem .chatActionBtn {
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease-in-out;
+    }
+    .chatHistoryItem:hover .chatActionBtn {
+        opacity: 1;
+        pointer-events: auto;
+    }
 }

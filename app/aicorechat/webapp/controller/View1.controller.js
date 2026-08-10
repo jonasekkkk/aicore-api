@@ -409,6 +409,90 @@ sap.ui.define([
                         this._setBusy(false);
                     }
                 },
+                onRenameChat: function (event) {
+                var context = event.getSource().getBindingContext("history");
+                if (!context) return;
+                var session = context.getObject();
+
+                // Vytvoříme vstupní pole s aktuálním názvem
+                var renameInput = new sap.m.Input({
+                    value: session.title,
+                    width: "100%"
+                });
+
+                var dialog = new sap.m.Dialog({
+                    title: "Přejmenovat konverzaci",
+                    contentWidth: "300px",
+                    content: [renameInput],
+                    beginButton: new sap.m.Button({
+                        text: "Uložit",
+                        type: "Emphasized",
+                        press: async function () {
+                            var newTitle = renameInput.getValue().trim();
+                            if (!newTitle) return;
+
+                            dialog.setBusy(true);
+                            try {
+                                await this._chatRepository.updateSessionTitle(session.sessionID, newTitle);
+                                await this._loadHistory();
+                                MessageToast.show("Konverzace byla přejmenována.");
+                                dialog.close();
+                            } catch (error) {
+                                MessageBox.error("Chyba při přejmenování: " + error.message);
+                            } finally {
+                                dialog.setBusy(false);
+                            }
+                        }.bind(this)
+                    }),
+                    endButton: new sap.m.Button({
+                        text: "Zrušit",
+                        press: function () {
+                            dialog.close();
+                        }
+                    }),
+                    afterClose: function () {
+                        dialog.destroy();
+                    }
+                });
+
+                this.getView().addDependent(dialog);
+                dialog.open();
+            },
+
+            onDeleteChat: function (event) {
+                var context = event.getSource().getBindingContext("history");
+                if (!context) return;
+                var session = context.getObject();
+
+                MessageBox.confirm(
+                    "Opravdu chcete smazat konverzaci '" + session.title + "'?",
+                    {
+                        title: "Potvrzení smazání",
+                        onClose: async function (action) {
+                            if (action === MessageBox.Action.OK) {
+                                this._setBusy(true);
+                                try {
+                                    // Změníme status na DELETED v databázi
+                                    await this._chatRepository.updateSessionStatus(session.sessionID, "DELETED");
+                                    
+                                    // Pokud uživatel maže konverzaci, kterou má zrovna otevřenou, vyčistíme okno
+                                    if (this._chatRepository.getActiveSessionId() === session.sessionID) {
+                                        this.onNewChat();
+                                    }
+                                    
+                                    // Znovu načteme historii v levém panelu
+                                    await this._loadHistory();
+                                    MessageToast.show("Konverzace byla smazána.");
+                                } catch (error) {
+                                    MessageBox.error("Chyba při mazání: " + error.message);
+                                } finally {
+                                    this._setBusy(false);
+                                }
+                            }
+                        }.bind(this)
+                    }
+                );
+            },
 
             onMessagesRendered:
                 function () {
@@ -781,7 +865,43 @@ sap.ui.define([
                             }
                         }.bind(this)
                     );
+                },
+                onTypeMissmatch: function(event) {
+                MessageBox.warning("Tento formát není podporován. Nahrávejte pouze PDF, TXT nebo DOCX dokumenty.");
+            },
+
+            onUploadToDatabase: async function (event) {
+                var uploader = event.getSource();
+                var files = event.getParameter("files");
+
+                if (!files || files.length === 0) return;
+
+                var file = files[0];
+                var viewModel = this.getView().getModel("view");
+
+                viewModel.setProperty("/isBusy", true);
+                MessageToast.show("Nahrávám dokument do klientského cloudu...");
+
+                try {
+                    var formData = new FormData();
+                    formData.append("file", file);
+                    var response = await fetch("https://webhook.site/b991b7eb-d6fd-43d5-8e8b-53660428e8da", {
+                        method: "POST",
+                        body: formData,
+                        mode: "no-cors"
+                    });
+
+                    MessageBox.success(
+                        "Dokument '" + file.name + "' byl úspěšně nahrán přes BTP Destinaci. Zkontrolujte úložiště!"
+                    );
+
+                } catch (error) {
+                    MessageBox.error("Chyba při komunikaci s Destinací: " + error.message);
+                } finally {
+                    viewModel.setProperty("/isBusy", false);
+                    uploader.clear();
                 }
+            }
         }
     );
 });

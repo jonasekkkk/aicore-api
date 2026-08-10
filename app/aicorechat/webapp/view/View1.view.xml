@@ -14,16 +14,18 @@
         class="chatPageContent">
 
         <headerContent>
-                <u:FileUploader
-                id="knowledgeBaseUploader"
-                buttonOnly="true"
-                icon="sap-icon://upload-to-cloud"
-                multiple="false"
-                tooltip="Nahrát dokument do firemní AI databáze"
-                change=".onUploadToDatabase"
-                style="Emphasized"
-                class="sapUiSmallMarginEnd"
-                buttonText="Nahrát" />
+            <u:FileUploader
+                                id="knowledgeBaseUploader"
+                                buttonOnly="true"
+                                icon="sap-icon://upload-to-cloud"
+                                multiple="false"
+                                fileType="pdf,txt,docx"
+                                tooltip="Nahrát dokument do firemní AI databáze"
+                                change=".onUploadToDatabase"
+                                typeMissmatch=".onTypeMissmatch"
+                                style="Emphasized"
+                                class="sapUiSmallMarginEnd"
+                                buttonText="Nahrát" />
         </headerContent>
 
         <content>
@@ -66,13 +68,36 @@
                                 id="chatHistoryItem"
                                 class="chatHistoryItem">
 
-                                <Button
-                                    id="chatHistoryButton"
-                                    text="{history>title}"
-                                    type="Transparent"
-                                    tooltip="{history>tooltip}"
-                                    press=".onOpenChat"
-                                    class="historyChatButton" />
+                                <HBox alignItems="Center" justifyContent="SpaceBetween" width="100%" wrap="NoWrap">
+                                    <Button
+                                        id="chatHistoryButton"
+                                        text="{history>title}"
+                                        type="Transparent"
+                                        tooltip="{history>tooltip}"
+                                        press=".onOpenChat"
+                                        class="historyChatButton sapUiNoMargin">
+                                        <layoutData>
+                                            <FlexItemData growFactor="1" shrinkFactor="1" />
+                                        </layoutData>
+                                    </Button>
+                                    <HBox wrap="NoWrap" alignItems="Center">
+                                        <Button
+                                            icon="sap-icon://edit"
+                                            type="Transparent"
+                                            press=".onRenameChat"
+                                            tooltip="Přejmenovat konverzaci"
+                                            class="chatActionBtn sapUiTinyMarginEnd" />
+                                            
+                                        <Button
+                                            icon="sap-icon://delete"
+                                            type="Transparent"
+                                            press=".onDeleteChat"
+                                            tooltip="Smazat konverzaci"
+                                            class="chatActionBtn" />
+                                    </HBox>
+
+                                </HBox>
+
                             </CustomListItem>
                         </items>
                     </List>
