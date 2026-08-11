@@ -309,14 +309,14 @@
                                 <u:FileUploader
                                     id="attachmentUploader"
                                     buttonOnly="true"
+                                    iconOnly="true"
                                     icon="sap-icon://attachment"
                                     multiple="true"
                                     enabled="{= !${view>/isBusy} &amp;&amp; !${view>/isReadingAttachments} }"
                                     tooltip="Nahrát soubory"
                                     change=".onFilesSelected"
                                     style="Transparent"
-                                    class="attachmentUploader"
-                                    buttonText=" " />
+                                    class="attachmentUploader" />
 
                                 <core:Icon
                                     id="composerUserIcon"

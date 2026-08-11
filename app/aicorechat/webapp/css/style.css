@@ -52,7 +52,7 @@ body.sapUiBody {
 
 .historyChatButton {
     flex: 1 1 0 !important;
-    width: auto !important;
+    width: 100% !important;
     min-width: 0;
     margin: 0 !important;
     overflow: hidden;
@@ -72,6 +72,7 @@ body.sapUiBody {
     border: 0 !important;
     color: #1d2d3e;
     background: transparent !important;
+    transition: padding-right 0.15s ease;
 }
 
 .historyChatButton .sapMBtnContent {
@@ -96,6 +97,7 @@ body.sapUiBody {
 
 .chatHistoryRow {
     display: flex !important;
+    position: relative;
     align-items: center;
     min-width: 0;
     width: 100% !important;
@@ -112,19 +114,41 @@ body.sapUiBody {
 }
 
 .chatHistoryActions {
-    flex: 0 0 4.25rem !important;
+    display: flex !important;
+    position: absolute;
+    z-index: 2;
+    top: 50%;
+    right: 0.35rem;
+    transform: translateY(-50%);
     justify-content: center;
     gap: 0.25rem;
     min-width: 4.25rem !important;
     width: 4.25rem !important;
     max-width: 4.25rem !important;
     box-sizing: border-box;
-    margin-left: auto;
-    margin-right: 0.35rem;
+    margin: 0;
     padding: 0.2rem 0.125rem;
     border-radius: 0.55rem;
+    background: transparent;
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transition:
+        visibility 0s linear 0.15s,
+        opacity 0.15s ease;
+}
+
+.chatHistoryRow:hover .historyChatButton .sapMBtnInner,
+.chatHistoryRow:focus-within .historyChatButton .sapMBtnInner {
+    padding-right: 4.75rem !important;
+}
+
+.chatHistoryRow:hover .chatHistoryActions,
+.chatHistoryRow:focus-within .chatHistoryActions {
+    visibility: visible;
     opacity: 1;
     pointer-events: auto;
+    transition-delay: 0s;
 }
 
 .chatActionBtn {
@@ -203,6 +227,19 @@ body.sapUiBody {
 
 .chatList,
 .chatList .sapMListUl {
+    background: transparent !important;
+}
+
+.chatList .sapMListNoData,
+.chatHistoryList .sapMListNoData {
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.chatList .sapMListNoDataText,
+.chatHistoryList .sapMListNoDataText {
+    color: #5b738b !important;
     background: transparent !important;
 }
 
@@ -459,23 +496,37 @@ body.sapUiBody {
     padding: 0 !important;
 }
 
-.attachmentUploader {
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
-}
-
-.attachmentUploader .sapUiFupGroup,
-.attachmentUploader .sapUiFupButton,
-.attachmentUploader .sapMBtnBase,
-.attachmentUploader .sapMBtn,
-.sendMessageButton.sapMBtn {
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
+.attachmentUploader.sapUiFupButtonOnly {
     min-width: 2.25rem !important;
     width: 2.25rem !important;
     max-width: 2.25rem !important;
+    height: 2.25rem !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible;
+}
+
+.attachmentUploader.sapUiFupButtonOnly >
+    .sapMInputBaseContentWrapper,
+.attachmentUploader .sapUiFupVisual {
+    width: 2.25rem !important;
+    height: 2.25rem !important;
+    overflow: visible;
+    box-sizing: border-box;
+}
+
+.attachmentUploader.sapUiFupButtonOnly >
+    .sapMInputBaseContentWrapper {
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.attachmentUploader .sapMBtn,
+.sendMessageButton.sapMBtn {
+    min-width: 2.25rem !important;
+    width: 2.25rem !important;
     height: 2.25rem !important;
     margin: 0 !important;
     padding: 0 !important;
@@ -499,7 +550,6 @@ body.sapUiBody {
     background: #f2f5f7 !important;
 }
 
-.attachmentUploader .sapMBtnIcon,
 .sendMessageButton .sapMBtnIcon {
     width: 2.25rem !important;
     line-height: 2.25rem !important;
@@ -508,7 +558,12 @@ body.sapUiBody {
 }
 
 .attachmentUploader .sapMBtnIcon {
+    width: auto !important;
+    height: auto !important;
+    margin: 0 !important;
+    line-height: 1 !important;
     color: #355b7d !important;
+    font-size: 0.9rem !important;
 }
 
 .attachmentUploader:hover .sapMBtnInner {
