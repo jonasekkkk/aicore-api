@@ -129,13 +129,28 @@ body.sapUiBody {
     margin: 0;
     padding: 0.2rem 0.125rem;
     border-radius: 0.55rem;
-    background: transparent;
+    background: #f2f5f7;
     visibility: hidden;
     opacity: 0;
     pointer-events: none;
     transition:
         visibility 0s linear 0.15s,
         opacity 0.15s ease;
+}
+
+.chatHistoryActions::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 100%;
+    width: 0.75rem;
+    height: 100%;
+    pointer-events: none;
+    background: linear-gradient(
+        90deg,
+        rgba(242, 245, 247, 0),
+        #f2f5f7
+    );
 }
 
 .chatHistoryRow:hover .historyChatButton .sapMBtnInner,
@@ -551,8 +566,9 @@ body.sapUiBody {
 }
 
 .sendMessageButton .sapMBtnIcon {
-    width: 2.25rem !important;
-    line-height: 2.25rem !important;
+    width: auto !important;
+    height: auto !important;
+    line-height: 1 !important;
     margin: 0 !important;
     font-size: 0.9rem !important;
 }
