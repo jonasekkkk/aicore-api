@@ -1,5 +1,3 @@
-0e77f84df201ee4ffd6e252681abf29bf52bd48e
-182b5a5a3d3671cb6e59c6e517602f5056cddc48
 html,
 body,
 #content,
@@ -53,9 +51,11 @@ body.sapUiBody {
 }
 
 .historyChatButton {
-    width: 100% !important;
+    flex: 1 1 0 !important;
+    width: auto !important;
     min-width: 0;
     margin: 0 !important;
+    overflow: hidden;
 }
 
 .newChatButton .sapMBtnInner,
@@ -95,7 +95,12 @@ body.sapUiBody {
 }
 
 .chatHistoryRow {
+    display: flex !important;
+    align-items: center;
     min-width: 0;
+    width: 100% !important;
+    overflow: hidden;
+    box-sizing: border-box;
     border-radius: 0.65rem;
     background: transparent;
     transition: background 0.15s ease;
@@ -107,21 +112,17 @@ body.sapUiBody {
 }
 
 .chatHistoryActions {
-    flex: 0 0 4.5rem;
+    flex: 0 0 4.25rem !important;
     justify-content: center;
     gap: 0.25rem;
-    width: 4.5rem !important;
+    min-width: 4.25rem !important;
+    width: 4.25rem !important;
+    max-width: 4.25rem !important;
     box-sizing: border-box;
-    margin-right: 0.2rem;
-    padding: 0.2rem 0.3rem;
+    margin-left: auto;
+    margin-right: 0.35rem;
+    padding: 0.2rem 0.125rem;
     border-radius: 0.55rem;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.15s ease;
-}
-
-.chatHistoryRow:hover .chatHistoryActions,
-.chatHistoryRow:focus-within .chatHistoryActions {
     opacity: 1;
     pointer-events: auto;
 }
@@ -460,13 +461,21 @@ body.sapUiBody {
 
 .attachmentUploader {
     display: flex !important;
-    align-items: flex-end;
+    align-items: center;
     justify-content: center;
 }
 
+.attachmentUploader .sapUiFupGroup,
+.attachmentUploader .sapUiFupButton,
+.attachmentUploader .sapMBtnBase,
 .attachmentUploader .sapMBtn,
 .sendMessageButton.sapMBtn {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.25rem !important;
     width: 2.25rem !important;
+    max-width: 2.25rem !important;
     height: 2.25rem !important;
     margin: 0 !important;
     padding: 0 !important;
@@ -474,8 +483,12 @@ body.sapUiBody {
 
 .attachmentUploader .sapMBtnInner,
 .sendMessageButton .sapMBtnInner {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
     min-width: 2.25rem !important;
     width: 2.25rem !important;
+    max-width: 2.25rem !important;
     height: 2.25rem !important;
     padding: 0 !important;
     border: 1px solid transparent !important;
@@ -490,6 +503,7 @@ body.sapUiBody {
 .sendMessageButton .sapMBtnIcon {
     width: 2.25rem !important;
     line-height: 2.25rem !important;
+    margin: 0 !important;
     font-size: 0.9rem !important;
 }
 
