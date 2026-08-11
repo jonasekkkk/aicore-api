@@ -1,3 +1,5 @@
+0e77f84df201ee4ffd6e252681abf29bf52bd48e
+182b5a5a3d3671cb6e59c6e517602f5056cddc48
 html,
 body,
 #content,
@@ -105,11 +107,14 @@ body.sapUiBody {
 }
 
 .chatHistoryActions {
-    flex: 0 0 4.125rem;
-    gap: 0.125rem;
-    width: 4.125rem !important;
+    flex: 0 0 4.5rem;
+    justify-content: center;
+    gap: 0.25rem;
+    width: 4.5rem !important;
     box-sizing: border-box;
-    padding-right: 0.125rem;
+    margin-right: 0.2rem;
+    padding: 0.2rem 0.3rem;
+    border-radius: 0.55rem;
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.15s ease;
@@ -122,14 +127,16 @@ body.sapUiBody {
 }
 
 .chatActionBtn {
-    width: 2rem !important;
-    height: 2rem !important;
+    width: 1.75rem !important;
+    height: 1.75rem !important;
     margin: 0 !important;
+    padding: 0 !important;
 }
 
 .chatActionBtn .sapMBtnInner {
-    min-width: 2rem !important;
-    height: 2rem !important;
+    min-width: 1.75rem !important;
+    width: 1.75rem !important;
+    height: 1.75rem !important;
     padding: 0 !important;
     border: 0 !important;
     border-radius: 0.45rem !important;
@@ -137,8 +144,8 @@ body.sapUiBody {
 }
 
 .chatActionBtn .sapMBtnIcon {
-    width: 2rem !important;
-    line-height: 2rem !important;
+    width: 1.75rem !important;
+    line-height: 1.75rem !important;
     color: #475e75 !important;
     font-size: 0.875rem !important;
 }
@@ -444,8 +451,25 @@ body.sapUiBody {
 .attachmentUploader,
 .sendMessageButton {
     flex: 0 0 auto;
+    align-self: flex-end;
     width: 2.25rem !important;
     height: 2.25rem !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.attachmentUploader {
+    display: flex !important;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.attachmentUploader .sapMBtn,
+.sendMessageButton.sapMBtn {
+    width: 2.25rem !important;
+    height: 2.25rem !important;
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
 .attachmentUploader .sapMBtnInner,
@@ -481,6 +505,7 @@ body.sapUiBody {
 .composerUserIcon {
     display: flex !important;
     flex: 0 0 2.25rem;
+    align-self: flex-end;
     align-items: center;
     justify-content: center;
     width: 2.25rem !important;
@@ -495,6 +520,7 @@ body.sapUiBody {
 
 .chatInput {
     flex: 1 1 auto;
+    align-self: flex-end;
     min-width: 0;
     width: 100% !important;
     max-width: none !important;
