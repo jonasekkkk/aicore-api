@@ -57,7 +57,7 @@ Dashboard se otevře na adrese vypsané CAP serverem, obvykle `http://localhost:
 | --- | --- |
 | `RPT_DESTINATION_NAME` | `RPT_Destination` |
 | `RPT_DEPLOYMENT_ID` | `da7b7f89b9428ee7` |
-| `RPT_RESOURCE_GROUP` | `default` |
+| `RPT_RESOURCE_GROUP` | `GroundingMgmt-Kleprlik` |
 | `RPT_MODEL_NAME` | `SAP RPT 1.5 Large` |
 | `RPT_PREDICT_ENDPOINT` | `/predict` |
 

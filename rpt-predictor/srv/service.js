@@ -14,7 +14,7 @@ const DESTINATION_NAME =
 const DEPLOYMENT_ID =
     process.env.RPT_DEPLOYMENT_ID || 'da7b7f89b9428ee7';
 const RESOURCE_GROUP =
-    process.env.RPT_RESOURCE_GROUP || 'default';
+    process.env.RPT_RESOURCE_GROUP || 'GroundingMgmt-Kleprlik';
 const MODEL_NAME =
     process.env.RPT_MODEL_NAME || 'SAP RPT 1.5 Large';
 const PREDICT_ENDPOINT =
