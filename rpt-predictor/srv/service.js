@@ -18,7 +18,7 @@ const RESOURCE_GROUP =
 const MODEL_NAME =
     process.env.RPT_MODEL_NAME || 'SAP RPT 1.5 Large';
 const PREDICT_ENDPOINT =
-    `/v2/inference/deployments/${DEPLOYMENT_ID}/predict`;
+    process.env.RPT_PREDICT_ENDPOINT || '/predict';
 
 const SAMPLE_REQUEST = Object.freeze({
     prediction_config: {

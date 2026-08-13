@@ -1088,7 +1088,7 @@ sap.ui.define([
         stateModel.setProperty('/requestText', pretty({
             destinationName: 'RPT_Destination',
             method: 'POST',
-            url: '/v2/inference/deployments/da7b7f89b9428ee7/predict',
+            url: '/predict',
             headers: {
                 'AI-Resource-Group': '<server configuration>',
                 'Content-Type': 'application/json'

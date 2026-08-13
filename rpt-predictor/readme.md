@@ -44,7 +44,9 @@ npm install --global @sap/cds-dk
 ```
 
 V BTP subaccountu musí existovat destination přesně pojmenovaná
-`RPT_Destination`. Po spuštění použijte v dashboardu nejprve tlačítko
+`RPT_Destination`. Její URL má končit kořenem deploymentu, například
+`/v2/inference/deployments/<deployment-id>/`; aplikace k ní připojí `/predict`.
+Po spuštění použijte v dashboardu nejprve tlačítko
 **Načíst destinaci** a až potom **Live model**.
 
 Dashboard se otevře na adrese vypsané CAP serverem, obvykle `http://localhost:4004/`.
@@ -57,6 +59,7 @@ Dashboard se otevře na adrese vypsané CAP serverem, obvykle `http://localhost:
 | `RPT_DEPLOYMENT_ID` | `da7b7f89b9428ee7` |
 | `RPT_RESOURCE_GROUP` | `default` |
 | `RPT_MODEL_NAME` | `SAP RPT 1.5 Large` |
+| `RPT_PREDICT_ENDPOINT` | `/predict` |
 
 ## Kontroly
 
