@@ -1,0 +1,16 @@
+{
+  "name": "rpt-predictor",
+  "version": "1.0.0",
+  "dependencies": {
+    "@sap-cloud-sdk/http-client": "^4.8.0",
+    "@sap/cds": "^9",
+    "csv-parser": "^3.2.1"
+  },
+  "devDependencies": {
+    "@cap-js/sqlite": "^2.4"
+  },
+  "scripts": {
+    "start": "cds-serve"
+  },
+  "private": true
+}
