@@ -75,7 +75,7 @@ module.exports = cds.service.impl(function () {
                 liveDestinationTest: true,
                 csvProfiling: true,
                 liveCsvPrediction: true,
-                csvDownload: false
+                csvDownload: true
             },
             sampleRequest: SAMPLE_REQUEST
         });
@@ -249,6 +249,8 @@ module.exports = cds.service.impl(function () {
                         payloadInfo.targets,
                         predictionPlaceholder
                     ),
+                    httpStatus: 200,
+                    completedAt: new Date().toISOString(),
                     durationMs: Date.now() - startedAt,
                     note: 'Výsledky jsou simulované a nebyly vytvořeny modelem.'
                 });
@@ -274,6 +276,7 @@ module.exports = cds.service.impl(function () {
                 request: buildRequestLog(payloadInfo.payload),
                 response: response.data,
                 httpStatus: response.status,
+                completedAt: new Date().toISOString(),
                 durationMs: Date.now() - startedAt
             });
         } catch (error) {

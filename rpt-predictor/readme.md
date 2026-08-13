@@ -10,6 +10,8 @@ Diagnostický CAP dashboard pro přípravu CSV dat a volání SAP RPT 1.5 Large 
 - načtení CSV, detekce oddělovače, datový profil a náhled,
 - automatická detekce všech buněk označených `[PREDICT]` ve všech sloupcích,
 - automatický odhad regrese nebo klasifikace pro každý cílový sloupec,
+- samostatná výsledková tabulka se zvýrazněnými predikcemi a metadaty odpovědi,
+- stažení kompletního CSV s doplněnými predikovanými hodnotami,
 - oddělená kontrola načtení BTP destination bez volání modelu,
 - podrobný request/response log včetně časování a HTTP stavů,
 - stažení nebo zkopírování technického logu.
