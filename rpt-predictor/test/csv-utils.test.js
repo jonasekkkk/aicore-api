@@ -4,6 +4,7 @@ const {
     buildCsvProfile,
     createMockPredictions,
     detectDelimiter,
+    detectPredictionTargets,
     parseCsvBuffer,
     prepareRptPayload,
     toBuffer
@@ -30,17 +31,16 @@ test('parseCsvBuffer načte quoted CSV a vytvoří profil', async () => {
     assert.equal(profile.suggestedTargetColumn, 'mnozstvi_prodano');
 });
 
-test('prepareRptPayload řadí context před query a zachová kontrakt RPT', () => {
+test('prepareRptPayload najde všechny [PREDICT] cíle a odhadne typ úlohy', () => {
     const result = prepareRptPayload(
         [
-            { id: 'Q-1', feature: 'A', target: '[PREDICT]' },
-            { id: 'C-1', feature: 'B', target: '12' },
-            { id: 'C-2', feature: 'C', target: '18' }
+            { id: 'Q-1', feature: 'A', amount: '[PREDICT]', category: 'Gold' },
+            { id: 'Q-2', feature: 'B', amount: '15', category: '[PREDICT]' },
+            { id: 'C-1', feature: 'B', amount: '12', category: 'Silver' },
+            { id: 'C-2', feature: 'C', amount: '18', category: 'Gold' }
         ],
         {
             indexColumn: 'id',
-            targetColumn: 'target',
-            taskType: 'regression',
             predictionPlaceholder: '[PREDICT]'
         }
     );
@@ -48,7 +48,20 @@ test('prepareRptPayload řadí context před query a zachová kontrakt RPT', () 
     assert.equal(result.payload.index_column, 'id');
     assert.equal(result.payload.rows[0].id, 'C-1');
     assert.equal(result.payload.rows[2].id, 'Q-1');
-    assert.equal(result.rowSelection.queryRows, 1);
+    assert.equal(result.rowSelection.queryRows, 2);
+    assert.equal(result.rowSelection.predictionCells, 2);
+    assert.deepEqual(result.payload.prediction_config.target_columns, [
+        {
+            name: 'amount',
+            task_type: 'regression',
+            prediction_placeholder: '[PREDICT]'
+        },
+        {
+            name: 'category',
+            task_type: 'classification',
+            prediction_placeholder: '[PREDICT]'
+        }
+    ]);
 });
 
 test('prepareRptPayload odmítne dataset bez predikčního řádku', () => {
@@ -62,21 +75,31 @@ test('prepareRptPayload odmítne dataset bez predikčního řádku', () => {
                 predictionPlaceholder: '[PREDICT]'
             }
         ),
-        /není prázdná hodnota/
+        /neobsahuje žádnou buňku/
     );
 });
 
-test('mock predikce mají strukturu RPT response', () => {
+test('mock predikce vrátí pouze pole označená [PREDICT]', () => {
+    const rows = [
+        { id: 'C-1', amount: '100', category: 'Gold' },
+        { id: 'Q-1', amount: '[PREDICT]', category: 'Gold' },
+        { id: 'Q-2', amount: '120', category: '[PREDICT]' }
+    ];
+    const targets = detectPredictionTargets(rows);
     const predictions = createMockPredictions(
-        [{ id: 'TX-1', target: '100' }],
+        rows,
         'id',
-        'target',
-        'regression'
+        targets,
+        '[PREDICT]'
     );
 
-    assert.equal(predictions[0].id, 'TX-1');
-    assert.equal(predictions[0].target[0].prediction, 97);
-    assert.deepEqual(predictions[0].target[0].confidence_interval, [87.3, 106.7]);
+    assert.equal(predictions.length, 2);
+    assert.equal(predictions[0].id, 'Q-1');
+    assert.equal(predictions[0].amount[0].prediction, 107.8);
+    assert.equal(predictions[0].category, undefined);
+    assert.equal(predictions[1].id, 'Q-2');
+    assert.equal(predictions[1].amount, undefined);
+    assert.equal(predictions[1].category[0].prediction, 'Gold');
 });
 
 test('toBuffer dekóduje OData Base64 payload', () => {

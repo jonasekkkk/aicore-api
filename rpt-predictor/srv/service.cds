@@ -2,6 +2,8 @@
 service PredictorService {
     action getDiagnostics() returns LargeString;
 
+    action checkDestination() returns LargeString;
+
     action pingModel(
         useMock : Boolean
     ) returns LargeString;

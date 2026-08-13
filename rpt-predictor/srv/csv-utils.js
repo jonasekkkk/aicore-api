@@ -5,6 +5,7 @@ const MAX_ROWS = 66000;
 const MAX_PREVIEW_ROWS = 5;
 const MAX_QUERY_ROWS = 128;
 const MAX_CONTEXT_ROWS = 8000;
+const MAX_TARGET_COLUMNS = 10;
 
 function toBuffer(value) {
     if (!value) {
@@ -116,7 +117,7 @@ function parseCsvBuffer(buffer, requestedDelimiter) {
     });
 }
 
-function buildCsvProfile(rows, delimiter) {
+function buildCsvProfile(rows, delimiter, predictionPlaceholder = '[PREDICT]') {
     const columns = Object.keys(rows[0] || {});
     const missingByColumn = {};
     const numericColumns = [];
@@ -146,6 +147,11 @@ function buildCsvProfile(rows, delimiter) {
         }
     });
 
+    const predictionTargets = detectPredictionTargets(
+        rows,
+        predictionPlaceholder
+    );
+
     return {
         rowCount: rows.length,
         columnCount: columns.length,
@@ -155,6 +161,17 @@ function buildCsvProfile(rows, delimiter) {
             .reduce((total, count) => total + count, 0),
         missingByColumn,
         numericColumns,
+        predictionTargets,
+        predictionCellCount: predictionTargets.reduce(
+            (total, target) => total + target.predictionCellCount,
+            0
+        ),
+        predictionRowCount: rows.filter((row) => predictionTargets.some(
+            (target) => isPredictionValue(
+                row[target.name],
+                predictionPlaceholder
+            )
+        )).length,
         suggestedIndexColumn: suggestIndexColumn(columns),
         suggestedTargetColumn: suggestTargetColumn(columns, numericColumns),
         previewRows: rows.slice(0, MAX_PREVIEW_ROWS)
@@ -162,27 +179,38 @@ function buildCsvProfile(rows, delimiter) {
 }
 
 function prepareRptPayload(rows, options) {
-    const placeholder = options.predictionPlaceholder;
-    const targetColumn = options.targetColumn;
+    const placeholder = String(options.predictionPlaceholder || '[PREDICT]');
+    const targets = detectPredictionTargets(rows, placeholder);
     const contextRows = [];
     const queryRows = [];
 
-    rows.forEach((row) => {
-        const targetValue = String(row[targetColumn] ?? '').trim();
-        if (!targetValue || targetValue === placeholder) {
-            queryRows.push({ ...row, [targetColumn]: placeholder });
-        } else {
-            contextRows.push(row);
-        }
-    });
-
-    if (!queryRows.length) {
+    if (!targets.length) {
         const error = new Error(
-            `V cílovém sloupci „${targetColumn}“ není prázdná hodnota ani ${placeholder}.`
+            `CSV neobsahuje žádnou buňku s hodnotou ${placeholder}.`
         );
         error.statusCode = 400;
         throw error;
     }
+
+    if (targets.length > MAX_TARGET_COLUMNS) {
+        const error = new Error(
+            `CSV obsahuje ${targets.length} cílových sloupců; maximum jednoho requestu je ${MAX_TARGET_COLUMNS}.`
+        );
+        error.statusCode = 400;
+        throw error;
+    }
+
+    rows.forEach((row) => {
+        const containsPrediction = targets.some((target) =>
+            isPredictionValue(row[target.name], placeholder)
+        );
+
+        if (containsPrediction) {
+            queryRows.push({ ...row });
+        } else {
+            contextRows.push(row);
+        }
+    });
 
     if (queryRows.length > MAX_QUERY_ROWS) {
         const error = new Error(
@@ -197,13 +225,11 @@ function prepareRptPayload(rows, options) {
     return {
         payload: {
             prediction_config: {
-                target_columns: [
-                    {
-                        name: targetColumn,
-                        task_type: options.taskType,
-                        prediction_placeholder: placeholder
-                    }
-                ]
+                target_columns: targets.map((target) => ({
+                    name: target.name,
+                    task_type: target.taskType,
+                    prediction_placeholder: placeholder
+                }))
             },
             index_column: options.indexColumn,
             rows: selectedContextRows.concat(queryRows)
@@ -211,39 +237,115 @@ function prepareRptPayload(rows, options) {
         rowSelection: {
             availableContextRows: contextRows.length,
             selectedContextRows: selectedContextRows.length,
-            queryRows: queryRows.length
-        }
+            queryRows: queryRows.length,
+            targetColumns: targets.length,
+            predictionCells: targets.reduce(
+                (total, target) => total + target.predictionCellCount,
+                0
+            )
+        },
+        targets
     };
 }
 
-function createMockPredictions(rows, indexColumn, targetColumn, taskType) {
-    return rows.slice(0, 5).map((row, index) => {
-        const currentValue = row[targetColumn];
-        const numericValue = Number(String(currentValue ?? '').replace(',', '.'));
-        const prediction = taskType === 'classification'
-            ? ['Low', 'Medium', 'High'][index % 3]
-            : Number.isFinite(numericValue)
-                ? Number((numericValue * (0.97 + index * 0.01)).toFixed(2))
-                : Number((10 + index * 2.4).toFixed(2));
+function createMockPredictions(
+    rows,
+    indexColumn,
+    targets,
+    predictionPlaceholder = '[PREDICT]'
+) {
+    const referenceValues = Object.fromEntries(targets.map((target) => [
+        target.name,
+        rows.map((row) => String(row[target.name] ?? '').trim())
+            .filter((value) => value && value !== predictionPlaceholder)
+    ]));
+    const queryRows = rows.filter((row) => targets.some((target) =>
+        isPredictionValue(row[target.name], predictionPlaceholder)
+    ));
+
+    return queryRows.map((row, rowIndex) => {
+        const result = {
+            [indexColumn]: row[indexColumn] || `MOCK-${rowIndex + 1}`
+        };
+
+        targets.forEach((target) => {
+            if (!isPredictionValue(row[target.name], predictionPlaceholder)) {
+                return;
+            }
+
+            const values = referenceValues[target.name];
+            const prediction = createMockValue(values, target.taskType, rowIndex);
+            result[target.name] = [{
+                prediction,
+                confidence: target.taskType === 'classification'
+                    ? Number(Math.max(0.55, 0.92 - rowIndex * 0.01).toFixed(2))
+                    : null,
+                confidence_interval: target.taskType === 'regression'
+                    ? [
+                        Number((Number(prediction) * 0.9).toFixed(2)),
+                        Number((Number(prediction) * 1.1).toFixed(2))
+                    ]
+                    : null
+            }];
+        });
+
+        return result;
+    });
+}
+
+function detectPredictionTargets(rows, predictionPlaceholder = '[PREDICT]') {
+    const columns = Object.keys(rows[0] || {});
+
+    return columns.map((column) => {
+        const values = rows.map((row) => String(row[column] ?? '').trim());
+        const predictionCellCount = values.filter(
+            (value) => value === predictionPlaceholder
+        ).length;
+        const knownValues = values.filter(
+            (value) => value && value !== predictionPlaceholder
+        );
 
         return {
-            [indexColumn]: row[indexColumn] || `MOCK-${index + 1}`,
-            [targetColumn]: [
-                {
-                    prediction,
-                    confidence: taskType === 'classification'
-                        ? Number((0.92 - index * 0.05).toFixed(2))
-                        : null,
-                    confidence_interval: taskType === 'regression'
-                        ? [
-                            Number((Number(prediction) * 0.9).toFixed(2)),
-                            Number((Number(prediction) * 1.1).toFixed(2))
-                        ]
-                        : null
-                }
-            ]
+            name: column,
+            taskType: inferTaskType(knownValues),
+            predictionCellCount,
+            knownValueCount: knownValues.length
         };
-    });
+    }).filter((target) => target.predictionCellCount > 0);
+}
+
+function inferTaskType(values) {
+    if (!values.length) {
+        return 'classification';
+    }
+
+    const numericValues = values.filter((value) =>
+        Number.isFinite(Number(String(value).replace(',', '.')))
+    );
+    return numericValues.length / values.length >= 0.8
+        ? 'regression'
+        : 'classification';
+}
+
+function isPredictionValue(value, placeholder) {
+    return String(value ?? '').trim() === placeholder;
+}
+
+function createMockValue(values, taskType, rowIndex) {
+    if (taskType === 'classification') {
+        const distinctValues = [...new Set(values)];
+        return distinctValues[rowIndex % distinctValues.length]
+            || ['Low', 'Medium', 'High'][rowIndex % 3];
+    }
+
+    const numericValues = values
+        .map((value) => Number(String(value).replace(',', '.')))
+        .filter(Number.isFinite);
+    const average = numericValues.length
+        ? numericValues.reduce((total, value) => total + value, 0)
+            / numericValues.length
+        : 10;
+    return Number((average * (1 + (rowIndex % 5 - 2) * 0.01)).toFixed(2));
 }
 
 function suggestIndexColumn(columns) {
@@ -289,6 +391,7 @@ function displayDelimiter(value) {
 module.exports = {
     buildCsvProfile,
     createMockPredictions,
+    detectPredictionTargets,
     detectDelimiter,
     parseCsvBuffer,
     prepareRptPayload,

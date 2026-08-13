@@ -2,6 +2,7 @@
   "name": "rpt-predictor",
   "version": "1.0.0",
   "dependencies": {
+    "@sap-cloud-sdk/connectivity": "^4.8.0",
     "@sap-cloud-sdk/http-client": "^4.8.0",
     "@sap/cds": "^9",
     "csv-parser": "^3.2.1"
@@ -14,6 +15,11 @@
     "watch": "cds watch",
     "check": "node --check srv/service.js && node --check app/dashboard.js",
     "test": "node --test test/*.test.js"
+  },
+  "cds": {
+    "requires": {
+      "destinations": true
+    }
   },
   "private": true
 }

@@ -1,4 +1,5 @@
 const cds = require('@sap/cds');
+const { getDestination } = require('@sap-cloud-sdk/connectivity');
 const { executeHttpRequest } = require('@sap-cloud-sdk/http-client');
 const {
     buildCsvProfile,
@@ -40,6 +41,8 @@ const SAMPLE_REQUEST = Object.freeze({
 
 module.exports = cds.service.impl(function () {
     this.on('getDiagnostics', async () => {
+        const runtimeBindings = getRuntimeBindingDiagnostics();
+
         return asJson({
             ok: true,
             mode: 'diagnostics',
@@ -55,7 +58,8 @@ module.exports = cds.service.impl(function () {
                 source: process.env.RPT_DESTINATION_NAME
                     ? 'environment'
                     : 'application default',
-                availability: 'not tested'
+                availability: 'not tested',
+                runtimeBindings
             },
             deployment: {
                 id: DEPLOYMENT_ID,
@@ -66,6 +70,7 @@ module.exports = cds.service.impl(function () {
             },
             capabilities: {
                 capHealth: true,
+                destinationLookup: true,
                 mockRequest: true,
                 liveDestinationTest: true,
                 csvProfiling: true,
@@ -74,6 +79,50 @@ module.exports = cds.service.impl(function () {
             },
             sampleRequest: SAMPLE_REQUEST
         });
+    });
+
+    this.on('checkDestination', async () => {
+        const startedAt = Date.now();
+        const runtimeBindings = getRuntimeBindingDiagnostics();
+
+        try {
+            const destination = await getDestination({
+                destinationName: DESTINATION_NAME,
+                useCache: false
+            });
+
+            if (!destination) {
+                return asJson({
+                    ok: false,
+                    checkedAt: new Date().toISOString(),
+                    durationMs: Date.now() - startedAt,
+                    destinationName: DESTINATION_NAME,
+                    runtimeBindings,
+                    error: {
+                        message: `Destination „${DESTINATION_NAME}“ nebyla nalezena.`
+                    }
+                });
+            }
+
+            return asJson({
+                ok: true,
+                checkedAt: new Date().toISOString(),
+                durationMs: Date.now() - startedAt,
+                destination: sanitizeDestination(destination),
+                runtimeBindings
+            });
+        } catch (error) {
+            console.error('Destination lookup failed', formatErrorForLog(error));
+
+            return asJson({
+                ok: false,
+                checkedAt: new Date().toISOString(),
+                durationMs: Date.now() - startedAt,
+                destinationName: DESTINATION_NAME,
+                runtimeBindings,
+                error: formatErrorForLog(error)
+            });
+        }
     });
 
     this.on('pingModel', async (req) => {
@@ -159,21 +208,24 @@ module.exports = cds.service.impl(function () {
                 fileBuffer,
                 req.data.delimiter
             );
-            const profile = buildCsvProfile(parsed.rows, parsed.delimiter);
-            const indexColumn = req.data.indexColumn || profile.suggestedIndexColumn;
-            const targetColumn = req.data.targetColumn || profile.suggestedTargetColumn;
-            const taskType = normalizeTaskType(req.data.taskType);
             const predictionPlaceholder =
                 String(req.data.predictionPlaceholder || '[PREDICT]');
+            const profile = buildCsvProfile(
+                parsed.rows,
+                parsed.delimiter,
+                predictionPlaceholder
+            );
+            const indexColumn = req.data.indexColumn || profile.suggestedIndexColumn;
             const useMock = req.data.useMock !== false;
 
             if (!indexColumn || !profile.columns.includes(indexColumn)) {
                 return req.reject(400, 'Vybraný indexový sloupec v CSV neexistuje.');
             }
 
-            if (!targetColumn || !profile.columns.includes(targetColumn)) {
-                return req.reject(400, 'Vybraný cílový sloupec v CSV neexistuje.');
-            }
+            const payloadInfo = prepareRptPayload(parsed.rows, {
+                indexColumn,
+                predictionPlaceholder
+            });
 
             if (useMock) {
                 return asJson({
@@ -186,28 +238,21 @@ module.exports = cds.service.impl(function () {
                     },
                     config: {
                         indexColumn,
-                        targetColumn,
-                        taskType,
+                        targets: payloadInfo.targets,
                         predictionPlaceholder
                     },
                     profile,
+                    rowSelection: payloadInfo.rowSelection,
                     predictions: createMockPredictions(
                         parsed.rows,
                         indexColumn,
-                        targetColumn,
-                        taskType
+                        payloadInfo.targets,
+                        predictionPlaceholder
                     ),
                     durationMs: Date.now() - startedAt,
                     note: 'Výsledky jsou simulované a nebyly vytvořeny modelem.'
                 });
             }
-
-            const payloadInfo = prepareRptPayload(parsed.rows, {
-                indexColumn,
-                targetColumn,
-                taskType,
-                predictionPlaceholder
-            });
 
             const response = await callRptModel(payloadInfo.payload);
 
@@ -221,8 +266,7 @@ module.exports = cds.service.impl(function () {
                 },
                 config: {
                     indexColumn,
-                    targetColumn,
-                    taskType,
+                    targets: payloadInfo.targets,
                     predictionPlaceholder
                 },
                 profile,
@@ -274,19 +318,83 @@ function buildRequestLog(data) {
     };
 }
 
-function normalizeTaskType(value) {
-    return value === 'classification' ? 'classification' : 'regression';
-}
-
 function formatErrorForLog(error) {
     return {
         name: error.name || 'Error',
         message: error.message || 'Unknown error',
         httpStatus: error.response?.status || null,
         response: error.response?.data || null,
+        causeChain: getErrorCauseChain(error),
         destination: DESTINATION_NAME,
         endpoint: PREDICT_ENDPOINT
     };
+}
+
+function getRuntimeBindingDiagnostics() {
+    const result = {
+        vcapServicesPresent: Boolean(process.env.VCAP_SERVICES),
+        serviceBindingRootPresent: Boolean(process.env.SERVICE_BINDING_ROOT),
+        localDestinationsPresent: Boolean(process.env.destinations),
+        serviceLabels: [],
+        destinationBindingDetected: false,
+        cdsEnvironment: process.env.CDS_ENV || 'default'
+    };
+
+    if (process.env.VCAP_SERVICES) {
+        try {
+            const services = JSON.parse(process.env.VCAP_SERVICES);
+            result.serviceLabels = Object.keys(services);
+            result.destinationBindingDetected = result.serviceLabels.some(
+                (label) => /destination/i.test(label)
+            );
+        } catch (_error) {
+            result.vcapServicesValidJson = false;
+        }
+    }
+
+    if (result.localDestinationsPresent) {
+        result.destinationBindingDetected = true;
+    }
+
+    return result;
+}
+
+function sanitizeDestination(destination) {
+    return {
+        name: destination.name || DESTINATION_NAME,
+        url: sanitizeUrl(destination.url),
+        authentication: destination.authentication || null,
+        proxyType: destination.proxyType || null,
+        forwardAuthToken: Boolean(destination.forwardAuthToken)
+    };
+}
+
+function sanitizeUrl(value) {
+    if (!value) {
+        return null;
+    }
+
+    try {
+        const url = new URL(value);
+        return `${url.origin}${url.pathname}`;
+    } catch (_error) {
+        return '<configured URL>';
+    }
+}
+
+function getErrorCauseChain(error) {
+    const messages = [];
+    let current = error;
+
+    while (current && messages.length < 5) {
+        const message = current.message || String(current);
+        if (!messages.includes(message)) {
+            messages.push(message);
+        }
+        current = current.cause;
+    }
+
+    return messages;
 }
 
 function asJson(value) {
