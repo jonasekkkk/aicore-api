@@ -10,7 +10,10 @@
     "@cap-js/sqlite": "^2.4"
   },
   "scripts": {
-    "start": "cds-serve"
+    "start": "cds-serve",
+    "watch": "cds watch",
+    "check": "node --check srv/service.js && node --check app/dashboard.js",
+    "test": "node --test test/*.test.js"
   },
   "private": true
 }

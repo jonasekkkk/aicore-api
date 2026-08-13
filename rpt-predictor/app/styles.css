@@ -1,0 +1,244 @@
+:root {
+    --rpt-blue: #0070f2;
+    --rpt-blue-dark: #0040b0;
+    --rpt-shell: #f5f6f7;
+    --rpt-border: #d5dadd;
+    --rpt-text-muted: #5b738b;
+    --rpt-console: #111820;
+    --rpt-console-border: #283849;
+}
+
+html,
+body,
+#content {
+    min-height: 100%;
+    margin: 0;
+    background: var(--rpt-shell);
+}
+
+.rptPage .sapMPageScroll {
+    background: var(--rpt-shell);
+}
+
+.rptShellBar {
+    border-bottom: 1px solid var(--rpt-border);
+    box-shadow: 0 1px 4px rgba(34, 54, 73, 0.08);
+}
+
+.rptBrandMark {
+    width: 2rem;
+    height: 2rem;
+    line-height: 2rem;
+    border-radius: 0.55rem;
+    color: #fff;
+    text-align: center;
+    background: linear-gradient(145deg, #0070f2, #003b7a);
+}
+
+.rptMain {
+    width: min(96rem, calc(100% - 2rem));
+    margin: 0 auto;
+    padding: 1.25rem 0 2rem;
+    box-sizing: border-box;
+}
+
+.rptHero {
+    position: relative;
+    overflow: hidden;
+    padding: 1.6rem 1.8rem;
+    color: #fff;
+    border-radius: 1rem;
+    background:
+        radial-gradient(circle at 90% 10%, rgba(104, 190, 255, 0.35), transparent 28%),
+        linear-gradient(120deg, #003b7a 0%, #0057b8 48%, #0070f2 100%);
+    box-shadow: 0 0.55rem 1.5rem rgba(0, 67, 150, 0.18);
+}
+
+.rptHero .sapMTitle,
+.rptHero .sapMText,
+.rptHero .sapUiIcon {
+    color: #fff;
+}
+
+.rptHeroTitle {
+    font-size: clamp(1.6rem, 3vw, 2.3rem) !important;
+    font-weight: 700 !important;
+}
+
+.rptHeroSubtitle {
+    max-width: 52rem;
+    margin-top: 0.35rem;
+    color: rgba(255, 255, 255, 0.88) !important;
+    font-size: 1rem !important;
+    line-height: 1.5 !important;
+}
+
+.rptHeroActions {
+    gap: 0.5rem;
+    margin-top: 1.1rem;
+}
+
+.rptHeroBadge {
+    display: inline-flex;
+    width: auto !important;
+    margin-right: 0.5rem;
+    padding: 0.34rem 0.7rem;
+    border: 1px solid rgba(255, 255, 255, 0.32);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.rptHeroBadge .sapMObjStatusText,
+.rptHeroBadge .sapUiIcon {
+    color: #fff !important;
+}
+
+.rptSectionTitle {
+    margin: 1.4rem 0 0.7rem !important;
+    color: #223548 !important;
+}
+
+.rptStatusGrid,
+.rptWorkspace,
+.rptButtonRow,
+.rptMetaRow,
+.rptFieldRow {
+    gap: 0.75rem;
+}
+
+.rptStatusCard {
+    flex: 1 1 16rem;
+    min-width: 15rem;
+    padding: 1rem;
+    border: 1px solid var(--rpt-border);
+    border-radius: 0.75rem;
+    background: #fff;
+    box-shadow: 0 0.18rem 0.55rem rgba(34, 54, 73, 0.07);
+}
+
+.rptStatusIcon {
+    width: 2.5rem;
+    height: 2.5rem;
+    margin-right: 0.75rem;
+    border-radius: 0.7rem;
+    color: var(--rpt-blue);
+    background: #eaf3fc;
+    text-align: center;
+    line-height: 2.5rem;
+}
+
+.rptCardHint,
+.rptMuted {
+    color: var(--rpt-text-muted) !important;
+}
+
+.rptPanel {
+    flex: 1 1 31rem;
+    min-width: min(31rem, 100%);
+    border: 1px solid var(--rpt-border);
+    border-radius: 0.8rem;
+    background: #fff;
+    box-shadow: 0 0.18rem 0.55rem rgba(34, 54, 73, 0.07);
+}
+
+.rptPanel > .sapMPanelWrappingDivTb,
+.rptPanel > .sapMPanelHdr {
+    border-radius: 0.8rem 0.8rem 0 0;
+}
+
+.rptPanel .sapMPanelContent {
+    padding: 1rem;
+}
+
+.rptField {
+    flex: 1 1 12rem;
+    min-width: 11rem;
+}
+
+.rptField .sapMLabel {
+    margin-bottom: 0.25rem;
+    color: #475e75;
+    font-weight: 600;
+}
+
+.rptUploadBox {
+    padding: 1rem;
+    border: 1px dashed #8ea7bd;
+    border-radius: 0.7rem;
+    background: #f7faff;
+}
+
+.rptMetaChip {
+    padding: 0.38rem 0.65rem;
+    border: 1px solid #d9e2ea;
+    border-radius: 0.55rem;
+    background: #f8fafb;
+}
+
+.rptMetaChip .sapMText:first-child {
+    margin-right: 0.35rem;
+    color: #5b738b;
+}
+
+.rptRequestArea textarea,
+.rptResponseArea textarea,
+.rptConsole textarea {
+    font-family: "72Mono", "SFMono-Regular", Consolas, monospace !important;
+    font-size: 0.78rem !important;
+    line-height: 1.45 !important;
+}
+
+.rptRequestArea textarea,
+.rptResponseArea textarea {
+    background: #f8fafb !important;
+}
+
+.rptConsole textarea {
+    color: #d7e8f7 !important;
+    border-color: var(--rpt-console-border) !important;
+    background: var(--rpt-console) !important;
+}
+
+.rptPreviewTable {
+    margin-top: 0.75rem;
+    border: 1px solid #e2e7ea;
+    border-radius: 0.55rem;
+}
+
+.rptPreviewTable .sapMListTblHeaderCell {
+    background: #f3f6f8;
+}
+
+.rptPreviewTable .sapMText {
+    font-size: 0.78rem;
+}
+
+.rptSpacerTop {
+    margin-top: 0.85rem;
+}
+
+.rptLogPanel {
+    margin-top: 0.75rem;
+}
+
+.rptModeStrip {
+    margin-bottom: 0.85rem;
+}
+
+@media (max-width: 48rem) {
+    .rptMain {
+        width: calc(100% - 1rem);
+        padding-top: 0.5rem;
+    }
+
+    .rptHero {
+        padding: 1.2rem;
+        border-radius: 0.7rem;
+    }
+
+    .rptPanel,
+    .rptStatusCard,
+    .rptField {
+        min-width: 100%;
+    }
+}

@@ -1,58 +1,23 @@
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-    <meta charset="UTF-8">
-    <title>AI Core Test</title>
-    <style>
-        body { font-family: Arial, sans-serif; padding: 40px; background-color: #f4f4f9; }
-        .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); text-align: center; }
-        button { padding: 12px 24px; font-size: 16px; font-weight: bold; background-color: #0070f2; color: white; border: none; border-radius: 4px; cursor: pointer; transition: 0.3s; }
-        button:hover { background-color: #0056b3; }
-        #responseBox { margin-top: 20px; padding: 15px; background: #222; color: #0f0; border-radius: 4px; text-align: left; overflow-x: auto; min-height: 50px; font-family: monospace; }
-        .loader { display: none; margin-top: 15px; font-weight: bold; color: #0070f2; }
-    </style>
-</head>
-<body>
-
-    <div class="container">
-        <h2>Test spojení s RPT modelem</h2>
-        <p>Klikni na tlačítko a pošli dummy request přes BTP destinaci do AI Core.</p>
-        
-        <button id="pingBtn">Zavolat AI Model</button>
-        <div id="loading" class="loader">Čekám na odpověď od AI... ⏳</div>
-        
-        <pre id="responseBox">Tady se objeví odpověď...</pre>
-    </div>
-
-    <script>
-        document.getElementById('pingBtn').addEventListener('click', async () => {
-            const responseBox = document.getElementById('responseBox');
-            const loading = document.getElementById('loading');
-            
-            // UI úpravy při načítání
-            responseBox.textContent = "";
-            loading.style.display = "block";
-
-            try {
-                // Volání CAP backendu (OData V4 action)
-                const res = await fetch('/odata/v4/predictor/pingModel', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({}) // Akce nemá parametry, posíláme prázdný objekt
-                });
-
-                const data = await res.json();
-                
-                // Výsledek z OData akce je schovaný ve vlastnosti 'value'
-                responseBox.textContent = data.value;
-
-            } catch (err) {
-                responseBox.textContent = "Chyba na frontendu: " + err;
-            } finally {
-                loading.style.display = "none";
-            }
-        });
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#0070f2">
+    <title>RPT Predictor — Diagnostics</title>
+    <link rel="stylesheet" href="styles.css">
+    <script
+        id="sap-ui-bootstrap"
+        src="https://ui5.sap.com/resources/sap-ui-core.js"
+        data-sap-ui-theme="sap_horizon"
+        data-sap-ui-libs="sap.m,sap.ui.unified"
+        data-sap-ui-compat-version="edge"
+        data-sap-ui-async="true"
+        data-sap-ui-resource-roots='{"rptpredictor":"./"}'
+        data-sap-ui-on-init="module:rptpredictor/dashboard">
     </script>
-
+</head>
+<body class="sapUiBody sapUiSizeCompact" id="content">
+    <noscript>Pro spuštění diagnostického dashboardu je potřeba JavaScript.</noscript>
 </body>
 </html>

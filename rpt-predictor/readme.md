@@ -1,22 +1,40 @@
-# Getting Started
+# RPT Predictor
 
-Welcome to your new CAP project.
+Diagnostický CAP dashboard pro přípravu CSV dat a volání SAP RPT 1.5 Large přes SAP BTP destination.
 
-It contains these folders and files, following our recommended project layout:
+## Co dashboard umí
 
-File or Folder | Purpose
----------|----------
-`app/` | content for UI frontends goes here
-`db/` | your domain models and data go here
-`srv/` | your service models and code go here
-`readme.md` | this getting started guide
+- kontrola dostupnosti CAP/OData služby,
+- zobrazení runtime konfigurace bez citlivých údajů,
+- oddělený mock a live test RPT deploymentu,
+- načtení CSV, detekce oddělovače, datový profil a náhled,
+- konfigurace indexového a cílového sloupce,
+- podrobný request/response log včetně časování a HTTP stavů,
+- stažení nebo zkopírování technického logu.
 
-## Next Steps
+Mock režim je vždy viditelně označený a nevolá externí službu. Live režim používá destination `RPT_Destination`.
 
-- Open a new terminal and run `cds watch`
-- (in VS Code simply choose _**Terminal** > Run Task > cds watch_)
-- Start with your domain model, in a CDS file in `db/`
+## Lokální spuštění v SAP BAS
 
-## Learn More
+```sh
+npm ci
+npm start
+```
 
-Learn more at <https://cap.cloud.sap>.
+Dashboard se otevře na adrese vypsané CAP serverem, obvykle `http://localhost:4004/`.
+
+## Volitelná runtime konfigurace
+
+| Proměnná | Výchozí hodnota |
+| --- | --- |
+| `RPT_DESTINATION_NAME` | `RPT_Destination` |
+| `RPT_DEPLOYMENT_ID` | `da7b7f89b9428ee7` |
+| `RPT_RESOURCE_GROUP` | `default` |
+| `RPT_MODEL_NAME` | `SAP RPT 1.5 Large` |
+
+## Kontroly
+
+```sh
+npm run check
+npm test
+```
