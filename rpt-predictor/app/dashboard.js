@@ -1256,7 +1256,7 @@ sap.ui.define([
             }));
         });
 
-        var previewSource = csvProfile.rows.slice(0, 4);
+        var previewSource = csvProfile.rows.slice(0, 5);
         csvProfile.rows.filter(function (row) {
             return csvProfile.predictionTargets.some(function (target) {
                 return isPredictionValue(
@@ -1265,12 +1265,12 @@ sap.ui.define([
                 );
             });
         }).forEach(function (row) {
-            if (previewSource.length < 8 && !previewSource.includes(row)) {
+            if (previewSource.length < 10 && !previewSource.includes(row)) {
                 previewSource.push(row);
             }
         });
         csvProfile.rows.forEach(function (row) {
-            if (previewSource.length < 8 && !previewSource.includes(row)) {
+            if (previewSource.length < 10 && !previewSource.includes(row)) {
                 previewSource.push(row);
             }
         });
