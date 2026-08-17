@@ -1083,11 +1083,11 @@ sap.ui.define([
     async function loadDemoFile() {
         setBusy(true);
         log('INFO', 'CSV', 'Načítám přiložený demo dataset.', {
-            url: 'mock/mock_prodeje_peciva_1000.csv'
+            url: 'mock/mock_sklad_1000.csv'
         });
 
         try {
-            var response = await fetch('mock/mock_prodeje_peciva_1000.csv');
+            var response = await fetch('mock/mock_sklad_1000.csv');
             if (!response.ok) {
                 throw new Error('Demo CSV vrátilo HTTP ' + response.status);
             }
@@ -1095,7 +1095,7 @@ sap.ui.define([
             var blob = await response.blob();
             var file = new File(
                 [blob],
-                'mock_prodeje_peciva_1000.csv',
+                'mock_sklad_1000.csv',
                 { type: 'text/csv' }
             );
             await loadCsvFile(file, 'demo');
