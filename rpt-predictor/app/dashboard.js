@@ -1244,8 +1244,9 @@ sap.ui.define([
         );
     }
 
-function rebuildPreviewTable() {
+    function rebuildPreviewTable() {
         var columns = csvProfile.headers;
+        var currentPlaceholder = placeholderInput.getValue() || '[PREDICT]';
 
         previewTable.removeAllColumns();
         columns.forEach(function (header) {
@@ -1260,7 +1261,7 @@ function rebuildPreviewTable() {
             return csvProfile.predictionTargets.some(function (target) {
                 return isPredictionValue(
                     row[target.name],
-                    placeholderInput.getValue() || '[PREDICT]'
+                    currentPlaceholder
                 );
             });
         }).forEach(function (row) {
@@ -1277,19 +1278,25 @@ function rebuildPreviewTable() {
         var previewRows = previewSource.map(function (row) {
             var mapped = {};
             columns.forEach(function (header, index) {
-                mapped['c' + index] = row[header];
+                var val = row[header];
+                var isPredict = isPredictionValue(val, currentPlaceholder);
+                
+                mapped['c' + index] = val;
+                mapped['s' + index] = isPredict ? 'Success' : 'None';
+                mapped['i' + index] = isPredict ? 'sap-icon://pending' : '';
             });
             return mapped;
         });
+
         previewModel.setProperty('/rows', previewRows);
         previewTable.bindItems({
             path: 'preview>/rows',
             template: new ColumnListItem({
                 cells: columns.map(function (_header, index) {
-                    return new Text({
+                    return new ObjectStatus({
                         text: '{preview>c' + index + '}',
-                        maxLines: 2,
-                        tooltip: '{preview>c' + index + '}'
+                        state: '{preview>s' + index + '}',
+                        icon: '{preview>i' + index + '}'
                     });
                 })
             }),
