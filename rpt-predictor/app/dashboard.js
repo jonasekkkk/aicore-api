@@ -299,7 +299,7 @@ sap.ui.define([
                             state: 'Information'
                         }).addStyleClass('rptHeroBadge')
                     ]
-                }),
+                }).addStyleClass('sapUiSmallMarginBottom'),
                 new Title({ text: 'Prediction Control Center', level: 'H1' })
                     .addStyleClass('rptHeroTitle'),
                 new Text({
@@ -475,7 +475,7 @@ sap.ui.define([
                         createMetaChip('Cílové sloupce', '/file/targets'),
                         createMetaChip('[PREDICT] buňky', '/file/predictionCells')
                     ]
-                }).addStyleClass('rptMetaRow rptSpacerTop'),
+                }).addStyleClass('rptMetaRow rptSpacerTop sapUiSmallMarginBottom'),
                 previewTable
             ]
         }).addStyleClass('rptPanel rptDataPanel');
@@ -607,14 +607,14 @@ sap.ui.define([
     }
 
     function createMetaChip(label, path) {
-        return new HBox({
-            alignItems: 'Center',
-            items: [
-                new Text({ text: label + ':' }),
-                new Text({ text: '{' + path + '}', maxLines: 1 })
-            ]
-        }).addStyleClass('rptMetaChip');
-    }
+    return new HBox({
+        alignItems: 'Center',
+        items: [
+            new Text({ text: label + ':' }),
+            new Text({ text: '{' + path + '}'})
+        ]
+    }).addStyleClass('rptMetaChip');
+}
 
     async function refreshDiagnostics() {
         setStatus('cap', 'Kontroluji…', 'Information');
