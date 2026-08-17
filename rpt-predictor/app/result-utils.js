@@ -27,7 +27,7 @@
         var rows = options.rows || [];
         var indexColumn = options.indexColumn;
         var targets = options.targets || [];
-        var placeholder = options.predictionPlaceholder || '[PREDICT]';
+        var placeholder = options.predictionPlaceholder !== undefined ? options.predictionPlaceholder : '';
         var predictions = options.predictions || [];
         var updatedRows = rows.map(function (row) {
             return Object.assign({}, row);
@@ -152,8 +152,11 @@
     }
 
     function isPredictionValue(value, placeholder) {
-        return String(value === undefined || value === null ? '' : value).trim()
-            === placeholder;
+        var trimmed = String(value === undefined || value === null ? '' : value).trim();
+        if (!placeholder || placeholder.trim() === '') {
+            return trimmed === '';
+        }
+        return trimmed === placeholder;
     }
 
     function formatValue(value) {

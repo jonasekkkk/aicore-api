@@ -13,7 +13,6 @@ sap.ui.define([
     'sap/m/ObjectStatus',
     'sap/m/Button',
     'sap/m/Select',
-    'sap/m/Input',
     'sap/m/TextArea',
     'sap/m/MessageStrip',
     'sap/m/Table',
@@ -40,7 +39,6 @@ sap.ui.define([
     ObjectStatus,
     Button,
     Select,
-    Input,
     TextArea,
     MessageStrip,
     Table,
@@ -103,7 +101,7 @@ sap.ui.define([
             rows: 0,
             targets: 0,
             requestId: '—',
-            statusMessage: 'Nahrajte CSV s označenými buňkami a spusťte predikci.',
+            statusMessage: 'Nahrajte CSV s prázdnými buňkami a spusťte predikci.',
             messageType: 'Information'
         },
         consoleText: ''
@@ -122,35 +120,35 @@ sap.ui.define([
             updateRequestPreview();
         }
     });
-    var placeholderInput = new Input({
-        width: '100%',
-        value: '[PREDICT]',
-        liveChange: updatePredictionTargets
-    });
+
     var detectedTargetsArea = new TextArea({
         value: 'Nejprve načtěte CSV.',
         editable: false,
         width: '100%',
         rows: 4
     }).addStyleClass('rptTargetSummary');
+
     var requestArea = new TextArea({
         value: '{/requestText}',
         editable: false,
         width: '100%',
         rows: 14
     }).addStyleClass('rptRequestArea');
+
     var responseArea = new TextArea({
         value: '{/responseText}',
         editable: false,
         width: '100%',
         rows: 14
     }).addStyleClass('rptResponseArea');
+
     var consoleArea = new TextArea({
         value: '{/consoleText}',
         editable: false,
         width: '100%',
         rows: 18
     }).addStyleClass('rptConsole');
+
     var previewTable = new Table({
         width: '100%',
         fixedLayout: false,
@@ -158,6 +156,7 @@ sap.ui.define([
         noDataText: 'Nahrajte CSV nebo načtěte ukázkový soubor.'
     }).addStyleClass('rptPreviewTable');
     previewTable.setModel(previewModel, 'preview');
+
     var resultTable = new Table({
         width: '100%',
         fixedLayout: false,
@@ -166,6 +165,7 @@ sap.ui.define([
         noDataText: 'Výsledky se zobrazí po úspěšné mock nebo live predikci.'
     }).addStyleClass('rptResultTable');
     resultTable.setModel(resultModel, 'result');
+
     var downloadResultButton = new Button({
         text: 'Stáhnout aktualizované CSV',
         icon: 'sap-icon://download',
@@ -259,7 +259,7 @@ sap.ui.define([
                 new Title({ text: 'Data a predikce', level: 'H2' })
                     .addStyleClass('rptSectionTitle'),
                 new MessageStrip({
-                    text: 'Každá buňka označená [PREDICT] se automaticky zařadí do predikce. Mock test nic neposílá mimo aplikaci; live test volá RPT_Destination.',
+                    text: 'Prázdné buňky v souboru se automaticky detekují a zařadí do predikce. Mock test nic neposílá mimo aplikaci; live test volá RPT_Destination.',
                     type: 'Information',
                     showIcon: true,
                     showCloseButton: false
@@ -412,7 +412,6 @@ sap.ui.define([
                     wrap: 'Wrap',
                     items: [
                         createField('Indexový sloupec', indexSelect),
-                        createField('Prediction placeholder', placeholderInput),
                         createField(
                             'Automaticky nalezené cíle',
                             detectedTargetsArea,
@@ -471,7 +470,7 @@ sap.ui.define([
                         createMetaChip('Oddělovač', '/file/delimiter'),
                         createMetaChip('Prázdné buňky', '/file/missing'),
                         createMetaChip('Cílové sloupce', '/file/targets'),
-                        createMetaChip('[PREDICT] buňky', '/file/predictionCells')
+                        createMetaChip('Prázdné buňky', '/file/predictionCells')
                     ]
                 }).addStyleClass('rptMetaRow rptSpacerTop sapUiSmallMarginBottom'),
                 previewTable
@@ -605,14 +604,14 @@ sap.ui.define([
     }
 
     function createMetaChip(label, path) {
-    return new HBox({
-        alignItems: 'Center',
-        items: [
-            new Text({ text: label + ':' }),
-            new Text({ text: '{' + path + '}'})
-        ]
-    }).addStyleClass('rptMetaChip');
-}
+        return new HBox({
+            alignItems: 'Center',
+            items: [
+                new Text({ text: label + ':' }),
+                new Text({ text: '{' + path + '}' })
+            ]
+        }).addStyleClass('rptMetaChip');
+    }
 
     async function refreshDiagnostics() {
         setStatus('cap', 'Kontroluji…', 'Information');
@@ -790,12 +789,8 @@ sap.ui.define([
 
         var config = getCsvConfig();
         if (!config.targets.length) {
-            MessageToast.show(
-                'CSV neobsahuje žádnou buňku ' + config.predictionPlaceholder + '.'
-            );
-            log('WARN', 'CSV', 'Predikce byla zastavena: nebyl nalezen žádný marker.', {
-                predictionPlaceholder: config.predictionPlaceholder
-            });
+            MessageToast.show('CSV neobsahuje žádné prázdné buňky k predikci.');
+            log('WARN', 'CSV', 'Predikce byla zastavena: nebyl nalezen žádný cíl s prázdnými buňkami.');
             return;
         }
 
@@ -812,7 +807,7 @@ sap.ui.define([
                     fileName: selectedFile.name,
                     delimiter: csvProfile.delimiterRaw,
                     indexColumn: config.indexColumn,
-                    predictionPlaceholder: config.predictionPlaceholder,
+                    predictionPlaceholder: '',
                     useMock: useMock
                 },
                 useMock ? 'CSV mock analysis' : 'CSV live prediction'
@@ -864,7 +859,7 @@ sap.ui.define([
             rows: csvProfile.rows,
             indexColumn: config.indexColumn,
             targets: config.targets,
-            predictionPlaceholder: config.predictionPlaceholder,
+            predictionPlaceholder: '',
             predictions: predictions
         });
         var columns = selectResultColumns(config);
@@ -901,9 +896,9 @@ sap.ui.define([
         );
         var hasMissingPredictions = merged.missingPredictionCount > 0;
         var statusMessage = hasMissingPredictions
-            ? 'Některé označené buňky model nevrátil. Zkontrolujte raw response.'
+            ? 'Některé prázdné buňky model nevrátil. Zkontrolujte raw response.'
             : merged.appliedPredictionCount
-                + ' označených buněk bylo nahrazeno predikcí SAP RPT.';
+                + ' prázdných buněk bylo úspěšně vyplněno predikcí SAP RPT.';
 
         stateModel.setProperty('/result', {
             ready: merged.appliedPredictionCount > 0,
@@ -1125,11 +1120,7 @@ sap.ui.define([
             }
 
             selectedFile = file;
-            csvProfile = profileCsv(
-                matrix,
-                delimiter,
-                placeholderInput.getValue() || '[PREDICT]'
-            );
+            csvProfile = profileCsv(matrix, delimiter);
             updateCsvUi();
             resetPredictionResults();
             updateRequestPreview();
@@ -1177,76 +1168,33 @@ sap.ui.define([
         rebuildPreviewTable();
     }
 
-    function updatePredictionTargets(event) {
-        var placeholder = event && event.getParameter
-            ? event.getParameter('value')
-            : placeholderInput.getValue();
-        placeholder = placeholder || '[PREDICT]';
-
-        if (csvProfile) {
-            resetPredictionResults();
-            csvProfile.predictionTargets = detectPredictionTargets(
-                csvProfile.rows,
-                placeholder
-            );
-            csvProfile.predictionCellCount = csvProfile.predictionTargets.reduce(
-                function (total, target) {
-                    return total + target.predictionCellCount;
-                },
-                0
-            );
-            stateModel.setProperty(
-                '/file/targets',
-                csvProfile.predictionTargets.length
-            );
-            stateModel.setProperty(
-                '/file/predictionCells',
-                csvProfile.predictionCellCount
-            );
-            updateTargetSummary();
-            setCsvReadyStatus();
-            rebuildPreviewTable();
-        }
-
-        updateRequestPreview();
-    }
-
     function updateTargetSummary() {
         if (!csvProfile || !csvProfile.predictionTargets.length) {
-            detectedTargetsArea.setValue(
-                'Nenalezen žádný marker '
-                + (placeholderInput.getValue() || '[PREDICT]')
-                + '. Prázdné buňky se automaticky nepredikují.'
-            );
+            detectedTargetsArea.setValue('V souboru nebyly nalezeny žádné prázdné buňky k predikci.');
             return;
         }
 
         detectedTargetsArea.setValue(csvProfile.predictionTargets.map(function (target) {
-            var taskLabel = target.taskType === 'regression'
-                ? 'regrese'
-                : 'klasifikace';
-            return target.name + ' · ' + taskLabel + ' · '
-                + target.predictionCellCount + '× [PREDICT]';
+            var taskLabel = target.taskType === 'regression' ? 'regrese' : 'klasifikace';
+            return target.name + ' · ' + taskLabel + ' · ' + target.predictionCellCount + '× prázdných';
         }).join('\n'));
     }
 
     function setCsvReadyStatus() {
         if (!csvProfile.predictionTargets.length) {
-            setStatus('csv', 'Chybí [PREDICT]', 'Warning');
+            setStatus('csv', 'Chybí prázdné buňky', 'Warning');
             return;
         }
 
         setStatus(
             'csv',
-            csvProfile.predictionTargets.length + ' cílů · '
-                + csvProfile.predictionCellCount + ' buněk',
+            csvProfile.predictionTargets.length + ' cílů · ' + csvProfile.predictionCellCount + ' prázdných buněk',
             'Success'
         );
     }
 
     function rebuildPreviewTable() {
         var columns = csvProfile.headers;
-        var currentPlaceholder = placeholderInput.getValue() || '[PREDICT]';
 
         previewTable.removeAllColumns();
         columns.forEach(function (header) {
@@ -1259,10 +1207,7 @@ sap.ui.define([
         var previewSource = csvProfile.rows.slice(0, 5);
         csvProfile.rows.filter(function (row) {
             return csvProfile.predictionTargets.some(function (target) {
-                return isPredictionValue(
-                    row[target.name],
-                    currentPlaceholder
-                );
+                return isPredictionValue(row[target.name]);
             });
         }).forEach(function (row) {
             if (previewSource.length < 10 && !previewSource.includes(row)) {
@@ -1279,7 +1224,7 @@ sap.ui.define([
             var mapped = {};
             columns.forEach(function (header, index) {
                 var val = row[header];
-                var isPredict = isPredictionValue(val, currentPlaceholder);
+                var isPredict = isPredictionValue(val);
                 
                 mapped['c' + index] = val;
                 mapped['s' + index] = isPredict ? 'Success' : 'None';
@@ -1310,18 +1255,12 @@ sap.ui.define([
         if (csvProfile) {
             var contextRows = csvProfile.rows.filter(function (row) {
                 return !config.targets.some(function (target) {
-                    return isPredictionValue(
-                        row[target.name],
-                        config.predictionPlaceholder
-                    );
+                    return isPredictionValue(row[target.name]);
                 });
             }).slice(0, 2);
             var queryRows = csvProfile.rows.filter(function (row) {
                 return config.targets.some(function (target) {
-                    return isPredictionValue(
-                        row[target.name],
-                        config.predictionPlaceholder
-                    );
+                    return isPredictionValue(row[target.name]);
                 });
             }).slice(0, 3);
             rows = contextRows.concat(queryRows).map(function (row) {
@@ -1330,7 +1269,7 @@ sap.ui.define([
         } else {
             rows = [
                 { sample_id: 'CTX-001', category: 'A', amount: 10, target_value: 12 },
-                { sample_id: 'QUERY-001', category: 'B', amount: 12, target_value: '[PREDICT]' }
+                { sample_id: 'QUERY-001', category: 'B', amount: 12, target_value: '' }
             ];
         }
 
@@ -1339,13 +1278,13 @@ sap.ui.define([
                 return {
                     name: target.name,
                     task_type: target.taskType,
-                    prediction_placeholder: config.predictionPlaceholder
+                    prediction_placeholder: ''
                 };
             })
             : [{
                 name: 'target_value',
                 task_type: 'regression',
-                prediction_placeholder: config.predictionPlaceholder
+                prediction_placeholder: ''
             }];
 
         stateModel.setProperty('/requestText', pretty({
@@ -1372,7 +1311,7 @@ sap.ui.define([
     function getCsvConfig() {
         return {
             indexColumn: indexSelect.getSelectedKey(),
-            predictionPlaceholder: placeholderInput.getValue() || '[PREDICT]',
+            predictionPlaceholder: '',
             targets: csvProfile ? csvProfile.predictionTargets : []
         };
     }
@@ -1658,7 +1597,7 @@ sap.ui.define([
         return rows;
     }
 
-    function profileCsv(matrix, delimiter, predictionPlaceholder) {
+    function profileCsv(matrix, delimiter) {
         var headers = matrix[0].map(function (header) {
             return String(header || '').replace(/^\uFEFF/, '').trim();
         });
@@ -1693,10 +1632,7 @@ sap.ui.define([
             }
         });
 
-        var predictionTargets = detectPredictionTargets(
-            rows,
-            predictionPlaceholder || '[PREDICT]'
-        );
+        var predictionTargets = detectPredictionTargets(rows);
 
         return {
             delimiterRaw: delimiter,
@@ -1714,7 +1650,7 @@ sap.ui.define([
         };
     }
 
-    function detectPredictionTargets(rows, predictionPlaceholder) {
+    function detectPredictionTargets(rows) {
         var headers = Object.keys(rows[0] || {});
 
         return headers.map(function (header) {
@@ -1722,10 +1658,10 @@ sap.ui.define([
                 return String(row[header] === undefined ? '' : row[header]).trim();
             });
             var predictionCellCount = values.filter(function (value) {
-                return value === predictionPlaceholder;
+                return value === '';
             }).length;
             var knownValues = values.filter(function (value) {
-                return value && value !== predictionPlaceholder;
+                return value !== '';
             });
             var numericCount = knownValues.filter(function (value) {
                 return Number.isFinite(Number(value.replace(',', '.')));
@@ -1744,9 +1680,8 @@ sap.ui.define([
         });
     }
 
-    function isPredictionValue(value, placeholder) {
-        return String(value === undefined || value === null ? '' : value).trim()
-            === placeholder;
+    function isPredictionValue(value) {
+        return String(value === undefined || value === null ? '' : value).trim() === '';
     }
 
     return {};

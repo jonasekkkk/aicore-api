@@ -5,11 +5,11 @@ const {
     mergePredictionResults
 } = require('../app/result-utils');
 
-test('mergePredictionResults aktualizuje jen označené buňky', () => {
+test('mergePredictionResults aktualizuje jen prázdné buňky', () => {
     const rows = [
         { id: 'C-1', amount: '10', category: 'Gold' },
-        { id: 'Q-1', amount: '[PREDICT]', category: 'Gold' },
-        { id: 'Q-2', amount: '20', category: '[PREDICT]' }
+        { id: 'Q-1', amount: '', category: 'Gold' },
+        { id: 'Q-2', amount: '20', category: '' }
     ];
     const predictions = [
         {
@@ -28,7 +28,7 @@ test('mergePredictionResults aktualizuje jen označené buňky', () => {
             { name: 'amount' },
             { name: 'category' }
         ],
-        predictionPlaceholder: '[PREDICT]',
+        predictionPlaceholder: '',
         predictions
     });
 
@@ -46,7 +46,7 @@ test('mergePredictionResults aktualizuje jen označené buňky', () => {
 
 test('mergePredictionResults použije pořadí query řádků jako fallback', () => {
     const merged = mergePredictionResults({
-        rows: [{ id: 'Q-1', target: '[PREDICT]' }],
+        rows: [{ id: 'Q-1', target: '' }],
         indexColumn: 'id',
         targets: [{ name: 'target' }],
         predictions: [{ target: [{ prediction: 'Done' }] }]

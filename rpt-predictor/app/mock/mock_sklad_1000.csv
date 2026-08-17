@@ -114,7 +114,7 @@ id_produktu,nazev_produktu,kategorie,dodavatel,zeme_puvodu,sklad_lokace,regal_ci
 113,Kabel USB-C Plus,Elektronika,AlfaGoods Kft.,Maďarsko,A,A20-7,28,6414.41,7.85,0.0903,7,130,10,2026-05-17,2026-07-07,1,12,Jaro,Normální,4.8,1
 114,Cereálie Pro,Potraviny,Iberia Distribuzione S.L.,Španělsko,B,B10-27,116,235.16,2.78,0.0446,39,162,20,2026-08-14,2026-10-21,17,166,Zima,Normální,4.3,13
 115,Malta Deluxe,Stavební materiál,Nordic Wholesale AB,Švédsko,C,C1-16,3,3036.31,10.25,0.1352,42,193,30,2026-05-19,2026-07-28,1,10,Léto,Nízká,4.7,1
-116,Reproduktor Premium,Elektronika,Iberia Distribuzione S.L.,Španělsko,A,A20-23,27,11111.66,1.02,0.011,33,[PREDICT],17,2026-04-16,2026-06-11,1,10,Zima,Nízká,3.4,1
+116,Reproduktor Premium,Elektronika,Iberia Distribuzione S.L.,Španělsko,A,A20-23,27,11111.66,1.02,0.011,33,,17,2026-04-16,2026-06-11,1,10,Zima,Nízká,3.4,1
 117,Malta Pro,Stavební materiál,Nordic Wholesale AB,Švédsko,C,C5-27,63,7843.89,1.21,0.0199,42,122,13,2026-07-14,2026-09-04,1,11,Zima,Normální,2.8,1
 118,Puzzle Max,Hračky,AlfaGoods Kft.,Maďarsko,C,C13-34,113,1410.61,1.95,0.0192,36,183,10,2026-04-06,2026-07-13,2,24,Podzim,Normální,3.6,2
 119,Pánské triko Max,Textil,GlobalParts Ltd.,Velká Británie,B,B11-14,32,3405.21,2.68,0.0518,6,68,19,2026-06-25,2026-09-10,1,12,Celoroční,Normální,3.8,1
@@ -140,7 +140,7 @@ id_produktu,nazev_produktu,kategorie,dodavatel,zeme_puvodu,sklad_lokace,regal_ci
 139,Sešívačka Compact,Kancelářské potřeby,Balkan Logistics d.o.o.,Chorvatsko,C,C8-6,94,179.3,0.16,0.0027,14,139,6,2026-07-31,2026-11-01,36,368,Léto,Normální,4.0,44
 140,Pořadač Basic,Kancelářské potřeby,GlobalParts Ltd.,Velká Británie,B,B18-24,205,1007.82,1.28,0.0075,11,206,21,2026-06-01,2026-07-18,7,76,Léto,Vysoká,3.7,9
 141,Malta Plus,Stavební materiál,NordSupply GmbH,Německo,B,B8-11,225,1287.79,32.2,0.3549,7,274,16,2026-04-07,2026-06-09,4,49,Podzim,Vysoká,4.5,4
-142,Cementová směs Standard,Stavební materiál,Iberia Distribuzione S.L.,Španělsko,D,D11-5,75,3976.31,33.64,[PREDICT],15,161,1,2026-06-11,2026-08-15,1,9,Celoroční,Normální,2.7,1
+142,Cementová směs Standard,Stavební materiál,Iberia Distribuzione S.L.,Španělsko,D,D11-5,75,3976.31,33.64,,15,161,1,2026-06-11,2026-08-15,1,9,Celoroční,Normální,2.7,1
 143,Dřevěná hra Lite,Hračky,EastTrade Sp. z o.o.,Polsko,D,D20-40,168,249.52,4.06,0.0643,26,231,10,2026-07-12,2026-10-03,10,101,Podzim,Normální,3.4,10
 144,Powerbanka Basic,Elektronika,Nordic Wholesale AB,Švédsko,A,A5-38,144,9425.84,8.75,0.0984,38,149,15,2026-05-30,2026-08-06,1,9,Jaro,Vysoká,4.9,1
 145,Psací stůl Compact,Nábytek,NordSupply GmbH,Německo,B,B17-17,178,12909.22,22.02,0.2614,39,235,4,2026-06-29,2026-08-02,0,0,Zima,Normální,3.8,0
@@ -615,7 +615,7 @@ id_produktu,nazev_produktu,kategorie,dodavatel,zeme_puvodu,sklad_lokace,regal_ci
 614,Regál Pro,Nábytek,NordSupply GmbH,Německo,B,B16-21,6,3710.46,41.33,0.6128,25,98,2,2026-06-13,2026-08-09,1,12,Celoroční,Nízká,3.5,1
 615,Pánské triko Deluxe,Textil,EastTrade Sp. z o.o.,Polsko,B,B9-38,14,1826.13,2.95,0.046,15,65,18,2026-06-24,2026-10-04,2,25,Podzim,Nízká,2.8,2
 616,Reproduktor Compact,Elektronika,Balkan Logistics d.o.o.,Chorvatsko,A,A4-3,26,22804.15,1.45,0.0192,29,89,15,2026-04-18,2026-07-09,0,0,Podzim,Nízká,3.0,0
-617,Puzzle Pro,Hračky,[PREDICT],Čína,C,C7-38,106,1067.7,0.74,0.0135,6,198,4,2026-05-25,2026-08-14,5,59,Jaro,Normální,3.2,5
+617,Puzzle Pro,Hračky,,Čína,C,C7-38,106,1067.7,0.74,0.0135,6,198,4,2026-05-25,2026-08-14,5,59,Jaro,Normální,3.2,5
 618,Termo prádlo Premium,Textil,Balkan Logistics d.o.o.,Chorvatsko,A,A20-39,73,712.62,2.71,0.0442,33,132,16,2026-05-29,2026-09-06,4,41,Celoroční,Normální,4.8,4
 619,Křovinořez Premium,Zahradní technika,AlfaGoods Kft.,Maďarsko,B,B11-7,98,15452.82,33.67,0.4886,40,292,25,2026-06-30,2026-09-25,1,10,Podzim,Normální,3.1,1
 620,Cereálie Eco,Potraviny,Danube Import s.r.o.,Slovensko,C,C11-9,29,301.94,8.87,0.0755,32,99,22,2026-04-24,2026-07-17,13,151,Celoroční,Nízká,2.6,14
@@ -647,7 +647,7 @@ id_produktu,nazev_produktu,kategorie,dodavatel,zeme_puvodu,sklad_lokace,regal_ci
 646,Termo prádlo Basic,Textil,Danube Import s.r.o.,Slovensko,C,C12-20,133,1605.18,2.1,0.0323,33,212,20,2026-05-25,2026-08-05,1,11,Podzim,Normální,4.6,1
 647,Šátek Deluxe,Textil,SinoTrade Co.,Čína,C,C7-18,132,2515.07,0.12,0.0008,14,273,25,2026-05-17,2026-07-29,1,9,Jaro,Normální,3.6,1
 648,Izolační deska Eco,Stavební materiál,SinoTrade Co.,Čína,B,B10-18,66,8896.32,1.39,0.0164,41,130,10,2026-03-15,2026-05-02,1,9,Léto,Normální,4.9,1
-649,RC autíčko Plus,Hračky,EastTrade Sp. z o.o.,Polsko,D,[PREDICT],161,139.13,3.94,0.0781,47,167,20,2026-05-25,2026-08-14,30,300,Podzim,Vysoká,3.2,30
+649,RC autíčko Plus,Hračky,EastTrade Sp. z o.o.,Polsko,D,,161,139.13,3.94,0.0781,47,167,20,2026-05-25,2026-08-14,30,300,Podzim,Vysoká,3.2,30
 650,Pánské triko Standard,Textil,ProLogix s.r.o.,Česká republika,B,B14-38,171,2315.03,2.06,0.0192,48,200,15,2026-05-30,2026-09-11,2,23,Celoroční,Vysoká,4.8,2
 651,Izolační deska Pro,Stavební materiál,Danube Import s.r.o.,Slovensko,A,A18-22,77,1980.52,16.02,0.0857,16,91,12,2026-04-09,2026-05-19,2,20,Celoroční,Vysoká,3.1,2
 652,RC autíčko Deluxe,Hračky,Balkan Logistics d.o.o.,Chorvatsko,C,C6-22,284,751.42,0.5,0.0027,43,331,4,2026-06-11,2026-07-29,8,77,Léto,Vysoká,4.5,10
@@ -662,7 +662,7 @@ id_produktu,nazev_produktu,kategorie,dodavatel,zeme_puvodu,sklad_lokace,regal_ci
 661,Křovinořez Plus,Zahradní technika,AlfaGoods Kft.,Maďarsko,A,A20-11,149,5043.59,18.8,0.1071,20,152,15,2026-07-14,2026-09-18,0,0,Podzim,Vysoká,3.3,0
 662,Pořadač Deluxe,Kancelářské potřeby,EastTrade Sp. z o.o.,Polsko,C,C13-33,8,1154.97,0.6,0.0097,46,282,12,2026-06-15,2026-08-31,2,18,Jaro,Nízká,4.6,2
 663,Konzerva Premium,Potraviny,AlfaGoods Kft.,Maďarsko,D,D20-1,25,112.7,1.58,0.0156,7,79,8,2026-06-24,2026-09-09,33,366,Podzim,Normální,4.2,32
-664,Ponožky sada Premium,Textil,[PREDICT],Velká Británie,C,C13-26,60,2809.48,0.8,0.0081,23,126,2,2026-05-30,2026-07-31,1,9,Podzim,Normální,4.0,1
+664,Ponožky sada Premium,Textil,,Velká Británie,C,C13-26,60,2809.48,0.8,0.0081,23,126,2,2026-05-30,2026-07-31,1,9,Podzim,Normální,4.0,1
 665,Dřevěná hra Basic,Hračky,Danube Import s.r.o.,Slovensko,B,B20-12,16,855.98,2.77,0.0509,50,175,9,2026-06-29,2026-08-06,3,33,Jaro,Nízká,3.2,3
 666,Křovinořez Compact,Zahradní technika,EastTrade Sp. z o.o.,Polsko,B,B15-5,69,10015.74,15.38,0.1199,29,108,28,2026-04-08,2026-06-12,1,11,Podzim,Normální,3.0,1
 667,Sešívačka Lite,Kancelářské potřeby,GlobalParts Ltd.,Velká Británie,A,A4-16,202,576.85,3.09,0.0317,43,254,3,2026-08-03,2026-09-01,5,53,Celoroční,Normální,3.8,5
@@ -697,14 +697,14 @@ id_produktu,nazev_produktu,kategorie,dodavatel,zeme_puvodu,sklad_lokace,regal_ci
 696,Dřevěná hra Basic,Hračky,GlobalParts Ltd.,Velká Británie,B,B12-38,137,952.07,4.41,0.0387,24,239,28,2026-06-16,2026-08-17,4,44,Jaro,Normální,3.9,4
 697,Vrut sada Compact,Stavební materiál,SinoTrade Co.,Čína,A,A20-15,109,2995.52,13.39,0.1966,45,308,30,2026-03-18,2026-05-16,1,12,Podzim,Normální,4.9,1
 698,Konzerva Premium,Potraviny,Iberia Distribuzione S.L.,Španělsko,C,C16-23,207,180.0,2.06,0.0269,32,248,8,2026-03-02,2026-04-09,32,356,Léto,Vysoká,2.8,42
-699,Vrut sada Basic,Stavební materiál,EastTrade Sp. z o.o.,Polsko,D,D20-38,50,4420.58,3.56,0.0539,30,88,19,2026-05-25,2026-08-07,1,10,Léto,Normální,2.6,[PREDICT]
+699,Vrut sada Basic,Stavební materiál,EastTrade Sp. z o.o.,Polsko,D,D20-38,50,4420.58,3.56,0.0539,30,88,19,2026-05-25,2026-08-07,1,10,Léto,Normální,2.6,
 700,Izolační deska Compact,Stavební materiál,NordSupply GmbH,Německo,D,D10-23,69,4271.8,19.46,0.3699,42,124,21,2026-04-12,2026-07-23,1,12,Jaro,Normální,4.0,1
 701,Sádrokarton Eco,Stavební materiál,Nordic Wholesale AB,Švédsko,A,A1-8,41,748.18,12.39,0.1761,10,152,15,2026-08-06,2026-10-01,8,99,Léto,Normální,4.3,10
 702,Kabel USB-C Deluxe,Elektronika,Iberia Distribuzione S.L.,Španělsko,C,C18-21,25,14337.77,1.08,0.0192,38,228,25,2026-06-26,2026-09-29,0,0,Léto,Nízká,3.4,0
 703,Balení papíru A4 Compact,Kancelářské potřeby,ProLogix s.r.o.,Česká republika,B,B6-40,17,241.73,4.57,0.0397,12,75,17,2026-08-10,2026-09-24,18,163,Jaro,Normální,2.6,19
-704,Reproduktor Deluxe,Elektronika,EastTrade Sp. z o.o.,Polsko,A,A2-27,5,[PREDICT],14.32,0.1091,43,119,21,2026-05-21,2026-07-19,3,28,Jaro,Nízká,3.0,3
+704,Reproduktor Deluxe,Elektronika,EastTrade Sp. z o.o.,Polsko,A,A2-27,5,,14.32,0.1091,43,119,21,2026-05-21,2026-07-19,3,28,Jaro,Nízká,3.0,3
 705,Vrut sada Premium,Stavební materiál,ProLogix s.r.o.,Česká republika,A,A14-38,139,8771.47,20.55,0.3808,24,213,11,2026-04-20,2026-05-23,0,0,Zima,Normální,4.2,0
-706,Plyšová hračka Premium,Hračky,ProLogix s.r.o.,Česká republika,A,A5-12,145,1430.57,[PREDICT],0.0781,42,278,4,2026-08-09,2026-09-09,3,33,Léto,Normální,3.0,4
+706,Plyšová hračka Premium,Hračky,ProLogix s.r.o.,Česká republika,A,A5-12,145,1430.57,,0.0781,42,278,4,2026-08-09,2026-09-09,3,33,Léto,Normální,3.0,4
 707,Termo prádlo Plus,Textil,AlfaGoods Kft.,Maďarsko,B,B5-38,237,464.74,0.13,0.0018,42,305,18,2026-04-07,2026-06-10,7,76,Jaro,Normální,4.8,8
 708,Powerbanka Deluxe,Elektronika,ProLogix s.r.o.,Česká republika,B,B7-32,77,4876.36,5.82,0.043,16,142,3,2026-05-23,2026-07-25,0,0,Celoroční,Normální,3.7,0
 709,Sekačka na trávu Deluxe,Zahradní technika,EastTrade Sp. z o.o.,Polsko,B,B14-4,85,6846.32,9.06,0.1295,49,218,21,2026-06-05,2026-07-23,1,10,Celoroční,Normální,3.5,1
@@ -741,7 +741,7 @@ id_produktu,nazev_produktu,kategorie,dodavatel,zeme_puvodu,sklad_lokace,regal_ci
 740,Powerbanka Premium,Elektronika,GlobalParts Ltd.,Velká Británie,C,C6-20,116,18034.77,0.77,0.0055,47,298,6,2026-08-09,2026-09-13,1,9,Podzim,Normální,4.6,1
 741,Stavebnice Basic,Hračky,SinoTrade Co.,Čína,B,B12-22,11,1724.41,0.75,0.0089,10,81,26,2026-08-07,2026-11-15,2,20,Zima,Normální,3.8,2
 742,Konzerva Max,Potraviny,AlfaGoods Kft.,Maďarsko,D,D6-19,23,377.27,1.82,0.0134,10,141,30,2026-08-16,2026-10-11,17,184,Podzim,Normální,3.4,17
-743,Sluchátka Deluxe,Elektronika,GlobalParts Ltd.,Velká Británie,C,C6-26,120,4966.6,8.19,0.0699,46,152,14,2026-03-27,2026-05-08,1,12,[PREDICT],Normální,4.2,1
+743,Sluchátka Deluxe,Elektronika,GlobalParts Ltd.,Velká Británie,C,C6-26,120,4966.6,8.19,0.0699,46,152,14,2026-03-27,2026-05-08,1,12,,Normální,4.2,1
 744,Dřevěná hra Pro,Hračky,NordSupply GmbH,Německo,C,C2-1,151,474.52,2.5,0.0277,44,156,30,2026-04-25,2026-06-17,4,43,Zima,Vysoká,4.4,3
 745,Křovinořez Pro,Zahradní technika,Balkan Logistics d.o.o.,Chorvatsko,B,B5-15,188,19343.43,2.2,0.0127,24,265,26,2026-04-10,2026-06-03,0,0,Podzim,Normální,4.7,0
 746,Cereálie Lite,Potraviny,Iberia Distribuzione S.L.,Španělsko,B,B13-17,111,38.09,8.87,0.0539,24,133,19,2026-05-28,2026-08-05,30,318,Podzim,Vysoká,2.5,28
@@ -933,7 +933,7 @@ id_produktu,nazev_produktu,kategorie,dodavatel,zeme_puvodu,sklad_lokace,regal_ci
 932,Dámská bunda Premium,Textil,Danube Import s.r.o.,Slovensko,A,A3-22,32,1195.4,0.15,0.0017,38,99,16,2026-04-12,2026-06-01,3,29,Celoroční,Nízká,2.7,3
 933,Olivový olej Compact,Potraviny,NordSupply GmbH,Německo,B,B17-33,32,192.07,3.31,0.0422,27,169,5,2026-08-01,2026-09-18,23,292,Léto,Normální,3.1,32
 934,Zahradní hadice Compact,Zahradní technika,GlobalParts Ltd.,Velká Británie,B,B17-29,113,15964.47,25.01,0.4618,40,192,12,2026-03-03,2026-04-20,0,0,Podzim,Normální,3.0,0
-935,Router Compact,Elektronika,EastTrade Sp. z o.o.,Polsko,A,A5-13,124,22522.45,2.42,0.0455,9,[PREDICT],4,2026-03-31,2026-05-15,0,0,Zima,Normální,3.0,0
+935,Router Compact,Elektronika,EastTrade Sp. z o.o.,Polsko,A,A5-13,124,22522.45,2.42,0.0455,9,,4,2026-03-31,2026-05-15,0,0,Zima,Normální,3.0,0
 936,Propiska sada Compact,Kancelářské potřeby,Danube Import s.r.o.,Slovensko,B,B13-38,226,532.35,1.01,0.0124,34,281,6,2026-04-26,2026-06-29,3,31,Zima,Vysoká,3.3,2
 937,Konferenční stolek Eco,Nábytek,Balkan Logistics d.o.o.,Chorvatsko,D,D10-1,36,3670.83,29.91,0.3242,15,271,5,2026-03-01,2026-06-03,1,10,Léto,Normální,3.4,1
 938,Balení kávy Lite,Potraviny,Danube Import s.r.o.,Slovensko,D,D7-38,6,364.48,9.33,0.1816,21,237,15,2026-08-15,2026-11-02,12,122,Podzim,Nízká,4.5,12

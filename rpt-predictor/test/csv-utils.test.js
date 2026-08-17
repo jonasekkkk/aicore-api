@@ -31,17 +31,16 @@ test('parseCsvBuffer načte quoted CSV a vytvoří profil', async () => {
     assert.equal(profile.suggestedTargetColumn, 'mnozstvi_prodano');
 });
 
-test('prepareRptPayload najde všechny [PREDICT] cíle a odhadne typ úlohy', () => {
+test('prepareRptPayload najde všechny prázdné buňky a odhadne typ úlohy', () => {
     const result = prepareRptPayload(
         [
-            { id: 'Q-1', feature: 'A', amount: '[PREDICT]', category: 'Gold' },
-            { id: 'Q-2', feature: 'B', amount: '15', category: '[PREDICT]' },
+            { id: 'Q-1', feature: 'A', amount: '', category: 'Gold' },
+            { id: 'Q-2', feature: 'B', amount: '15', category: '' },
             { id: 'C-1', feature: 'B', amount: '12', category: 'Silver' },
             { id: 'C-2', feature: 'C', amount: '18', category: 'Gold' }
         ],
         {
-            indexColumn: 'id',
-            predictionPlaceholder: '[PREDICT]'
+            indexColumn: 'id'
         }
     );
 
@@ -54,43 +53,41 @@ test('prepareRptPayload najde všechny [PREDICT] cíle a odhadne typ úlohy', ()
         {
             name: 'amount',
             task_type: 'regression',
-            prediction_placeholder: '[PREDICT]'
+            prediction_placeholder: ''
         },
         {
             name: 'category',
             task_type: 'classification',
-            prediction_placeholder: '[PREDICT]'
+            prediction_placeholder: ''
         }
     ]);
 });
 
-test('prepareRptPayload odmítne dataset bez predikčního řádku', () => {
+test('prepareRptPayload odmítne dataset bez prázdného řádku', () => {
     assert.throws(
         () => prepareRptPayload(
             [{ id: 'C-1', target: '12' }],
             {
                 indexColumn: 'id',
                 targetColumn: 'target',
-                taskType: 'regression',
-                predictionPlaceholder: '[PREDICT]'
+                taskType: 'regression'
             }
         ),
-        /neobsahuje žádnou buňku/
+        /neobsahuje žádné prázdné buňky/
     );
 });
 
-test('mock predikce vrátí pouze pole označená [PREDICT]', () => {
+test('mock predikce vrátí pouze pole s prázdnými buňkami', () => {
     const rows = [
         { id: 'C-1', amount: '100', category: 'Gold' },
-        { id: 'Q-1', amount: '[PREDICT]', category: 'Gold' },
-        { id: 'Q-2', amount: '120', category: '[PREDICT]' }
+        { id: 'Q-1', amount: '', category: 'Gold' },
+        { id: 'Q-2', amount: '120', category: '' }
     ];
     const targets = detectPredictionTargets(rows);
     const predictions = createMockPredictions(
         rows,
         'id',
-        targets,
-        '[PREDICT]'
+        targets
     );
 
     assert.equal(predictions.length, 2);

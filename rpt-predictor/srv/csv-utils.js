@@ -117,7 +117,7 @@ function parseCsvBuffer(buffer, requestedDelimiter) {
     });
 }
 
-function buildCsvProfile(rows, delimiter, predictionPlaceholder = '[PREDICT]') {
+function buildCsvProfile(rows, delimiter) {
     const columns = Object.keys(rows[0] || {});
     const missingByColumn = {};
     const numericColumns = [];
@@ -147,10 +147,7 @@ function buildCsvProfile(rows, delimiter, predictionPlaceholder = '[PREDICT]') {
         }
     });
 
-    const predictionTargets = detectPredictionTargets(
-        rows,
-        predictionPlaceholder
-    );
+    const predictionTargets = detectPredictionTargets(rows);
 
     return {
         rowCount: rows.length,
@@ -167,10 +164,7 @@ function buildCsvProfile(rows, delimiter, predictionPlaceholder = '[PREDICT]') {
             0
         ),
         predictionRowCount: rows.filter((row) => predictionTargets.some(
-            (target) => isPredictionValue(
-                row[target.name],
-                predictionPlaceholder
-            )
+            (target) => isPredictionValue(row[target.name])
         )).length,
         suggestedIndexColumn: suggestIndexColumn(columns),
         suggestedTargetColumn: suggestTargetColumn(columns, numericColumns),
@@ -179,15 +173,12 @@ function buildCsvProfile(rows, delimiter, predictionPlaceholder = '[PREDICT]') {
 }
 
 function prepareRptPayload(rows, options) {
-    const placeholder = String(options.predictionPlaceholder || '[PREDICT]');
-    const targets = detectPredictionTargets(rows, placeholder);
+    const targets = detectPredictionTargets(rows);
     const contextRows = [];
     const queryRows = [];
 
     if (!targets.length) {
-        const error = new Error(
-            `CSV neobsahuje žádnou buňku s hodnotou ${placeholder}.`
-        );
+        const error = new Error('CSV neobsahuje žádné prázdné buňky k predikci.');
         error.statusCode = 400;
         throw error;
     }
@@ -202,7 +193,7 @@ function prepareRptPayload(rows, options) {
 
     rows.forEach((row) => {
         const containsPrediction = targets.some((target) =>
-            isPredictionValue(row[target.name], placeholder)
+            isPredictionValue(row[target.name])
         );
 
         if (containsPrediction) {
@@ -228,7 +219,7 @@ function prepareRptPayload(rows, options) {
                 target_columns: targets.map((target) => ({
                     name: target.name,
                     task_type: target.taskType,
-                    prediction_placeholder: placeholder
+                    prediction_placeholder: ''
                 }))
             },
             index_column: options.indexColumn,
@@ -248,19 +239,14 @@ function prepareRptPayload(rows, options) {
     };
 }
 
-function createMockPredictions(
-    rows,
-    indexColumn,
-    targets,
-    predictionPlaceholder = '[PREDICT]'
-) {
+function createMockPredictions(rows, indexColumn, targets) {
     const referenceValues = Object.fromEntries(targets.map((target) => [
         target.name,
         rows.map((row) => String(row[target.name] ?? '').trim())
-            .filter((value) => value && value !== predictionPlaceholder)
+            .filter((value) => value !== '')
     ]));
     const queryRows = rows.filter((row) => targets.some((target) =>
-        isPredictionValue(row[target.name], predictionPlaceholder)
+        isPredictionValue(row[target.name])
     ));
 
     return queryRows.map((row, rowIndex) => {
@@ -269,7 +255,7 @@ function createMockPredictions(
         };
 
         targets.forEach((target) => {
-            if (!isPredictionValue(row[target.name], predictionPlaceholder)) {
+            if (!isPredictionValue(row[target.name])) {
                 return;
             }
 
@@ -293,16 +279,16 @@ function createMockPredictions(
     });
 }
 
-function detectPredictionTargets(rows, predictionPlaceholder = '[PREDICT]') {
+function detectPredictionTargets(rows) {
     const columns = Object.keys(rows[0] || {});
 
     return columns.map((column) => {
         const values = rows.map((row) => String(row[column] ?? '').trim());
         const predictionCellCount = values.filter(
-            (value) => value === predictionPlaceholder
+            (value) => value === ''
         ).length;
         const knownValues = values.filter(
-            (value) => value && value !== predictionPlaceholder
+            (value) => value !== ''
         );
 
         return {
@@ -327,8 +313,8 @@ function inferTaskType(values) {
         : 'classification';
 }
 
-function isPredictionValue(value, placeholder) {
-    return String(value ?? '').trim() === placeholder;
+function isPredictionValue(value) {
+    return String(value ?? '').trim() === '';
 }
 
 function createMockValue(values, taskType, rowIndex) {

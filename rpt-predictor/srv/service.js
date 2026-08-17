@@ -26,7 +26,7 @@ const SAMPLE_REQUEST = Object.freeze({
             {
                 name: 'target_value',
                 task_type: 'regression',
-                prediction_placeholder: '[PREDICT]'
+                prediction_placeholder: ''
             }
         ]
     },
@@ -35,7 +35,7 @@ const SAMPLE_REQUEST = Object.freeze({
         { sample_id: 'CTX-001', category: 'A', amount: 10, target_value: 12 },
         { sample_id: 'CTX-002', category: 'B', amount: 20, target_value: 24 },
         { sample_id: 'CTX-003', category: 'A', amount: 15, target_value: 18 },
-        { sample_id: 'QUERY-001', category: 'B', amount: 12, target_value: '[PREDICT]' }
+        { sample_id: 'QUERY-001', category: 'B', amount: 12, target_value: '' }
     ]
 });
 
@@ -208,12 +208,10 @@ module.exports = cds.service.impl(function () {
                 fileBuffer,
                 req.data.delimiter
             );
-            const predictionPlaceholder =
-                String(req.data.predictionPlaceholder || '[PREDICT]');
+            const predictionPlaceholder = '';
             const profile = buildCsvProfile(
                 parsed.rows,
-                parsed.delimiter,
-                predictionPlaceholder
+                parsed.delimiter
             );
             const indexColumn = req.data.indexColumn || profile.suggestedIndexColumn;
             const useMock = req.data.useMock !== false;
@@ -223,8 +221,7 @@ module.exports = cds.service.impl(function () {
             }
 
             const payloadInfo = prepareRptPayload(parsed.rows, {
-                indexColumn,
-                predictionPlaceholder
+                indexColumn
             });
 
             if (useMock) {
@@ -246,8 +243,7 @@ module.exports = cds.service.impl(function () {
                     predictions: createMockPredictions(
                         parsed.rows,
                         indexColumn,
-                        payloadInfo.targets,
-                        predictionPlaceholder
+                        payloadInfo.targets
                     ),
                     httpStatus: 200,
                     completedAt: new Date().toISOString(),
