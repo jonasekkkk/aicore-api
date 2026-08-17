@@ -248,6 +248,16 @@ body,
     border-radius: 0.45rem;
 }
 
+.rptResultTable .sapMObjStatusSuccess {
+    display: inline-flex;
+    max-width: 100%;
+    padding: 0.3rem 0.45rem;
+    border: 1px solid #86d5a2;
+    border-radius: 0.45rem;
+    background: #edf9f1;
+    box-shadow: inset 0 0 0 1px rgba(16, 126, 62, 0.06);
+}
+
 .rptPreviewTable .sapMObjStatusSuccess {
     display: inline-flex;
     max-width: 100%;
