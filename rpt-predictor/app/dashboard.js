@@ -326,12 +326,6 @@ sap.ui.define([
                             type: 'Default',
                             press: runLivePing
                         }),
-                        new Button({
-                            text: 'Načíst demo CSV',
-                            icon: 'sap-icon://document-text',
-                            type: 'Transparent',
-                            press: loadDemoFile
-                        })
                     ]
                 }).addStyleClass('rptHeroActions')
             ]
@@ -412,41 +406,10 @@ sap.ui.define([
     function createControlPanel() {
         return new Panel({
             headerToolbar: panelToolbar(
-                'Diagnostika a testy',
+                'Konfigurace CSV requestu',
                 'sap-icon://activity-2'
             ),
             content: [
-                new Text({
-                    text: 'Ověřte vrstvy postupně. Live RPT test může trvat až dvě minuty.'
-                }).addStyleClass('rptMuted'),
-                new FlexBox({
-                    wrap: 'Wrap',
-                    items: [
-                        new Button({
-                            text: 'CAP health',
-                            icon: 'sap-icon://sys-enter-2',
-                            press: refreshDiagnostics
-                        }),
-                        new Button({
-                            text: 'Načíst destinaci',
-                            icon: 'sap-icon://cloud-check',
-                            press: runDestinationCheck
-                        }),
-                        new Button({
-                            text: 'Mock model',
-                            icon: 'sap-icon://simulate',
-                            press: runMockPing
-                        }),
-                        new Button({
-                            text: 'Live model',
-                            icon: 'sap-icon://journey-arrive',
-                            type: 'Emphasized',
-                            press: runLivePing
-                        })
-                    ]
-                }).addStyleClass('rptButtonRow rptSpacerTop'),
-                new Title({ text: 'Konfigurace CSV requestu', level: 'H4' })
-                    .addStyleClass('rptSpacerTop'),
                 new FlexBox({
                     wrap: 'Wrap',
                     items: [
@@ -458,7 +421,7 @@ sap.ui.define([
                             'rptFieldWide'
                         )
                     ]
-                }).addStyleClass('rptFieldRow'),
+                }).addStyleClass('rptFieldRow rptSpacerTop'),
                 new FlexBox({
                     wrap: 'Wrap',
                     items: [

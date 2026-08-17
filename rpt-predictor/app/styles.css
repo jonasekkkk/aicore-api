@@ -107,6 +107,8 @@ body,
 }
 
 .rptStatusCard {
+    display: flex !important;
+    align-items: center !important;
     flex: 1 1 16rem;
     min-width: 15rem;
     padding: 1rem;
@@ -117,14 +119,16 @@ body,
 }
 
 .rptStatusIcon {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
     width: 2.5rem;
     height: 2.5rem;
     margin-right: 0.75rem;
     border-radius: 0.7rem;
     color: var(--rpt-blue);
     background: #eaf3fc;
-    text-align: center;
-    line-height: 2.5rem;
 }
 
 .rptCardHint,

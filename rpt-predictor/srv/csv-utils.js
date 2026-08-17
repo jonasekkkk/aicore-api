@@ -3,7 +3,7 @@ const { Readable } = require('stream');
 
 const MAX_ROWS = 66000;
 const MAX_PREVIEW_ROWS = 5;
-const MAX_QUERY_ROWS = 128;
+const MAX_QUERY_ROWS = 512;
 const MAX_CONTEXT_ROWS = 8000;
 const MAX_TARGET_COLUMNS = 10;
 
