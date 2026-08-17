@@ -154,7 +154,6 @@ sap.ui.define([
     var previewTable = new Table({
         width: '100%',
         fixedLayout: false,
-        autoPopinMode: true,
         growing: false,
         noDataText: 'Nahrajte CSV nebo načtěte ukázkový soubor.'
     }).addStyleClass('rptPreviewTable');
@@ -162,7 +161,6 @@ sap.ui.define([
     var resultTable = new Table({
         width: '100%',
         fixedLayout: false,
-        autoPopinMode: true,
         growing: true,
         growingThreshold: 20,
         noDataText: 'Výsledky se zobrazí po úspěšné mock nebo live predikci.'
@@ -1246,34 +1244,13 @@ sap.ui.define([
         );
     }
 
-    function rebuildPreviewTable() {
-        var preferred = [
-            'id_transakce',
-            'nazev_odberatele',
-            'nazev_produktu',
-            'kategorie_produktu',
-            'mnozstvi_objednano',
-            'mnozstvi_prodano',
-            'trzba_bez_dph_czk',
-            'hruba_marze_czk',
-            'stav_transakce'
-        ];
-        var columns = preferred.filter(function (column) {
-            return csvProfile.headers.includes(column);
-        });
-
-        csvProfile.headers.forEach(function (header) {
-            if (columns.length < 8 && !columns.includes(header)) {
-                columns.push(header);
-            }
-        });
-        columns = columns.slice(0, 8);
+function rebuildPreviewTable() {
+        var columns = csvProfile.headers;
 
         previewTable.removeAllColumns();
         columns.forEach(function (header) {
             previewTable.addColumn(new Column({
-                width: header.includes('nazev') ? '13rem' : '9rem',
-                importance: columns.indexOf(header) < 4 ? 'High' : 'Medium',
+                importance: 'High',
                 header: new Label({ text: header })
             }));
         });

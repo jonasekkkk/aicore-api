@@ -228,7 +228,7 @@ body,
 .rptResultTable {
     border: 1px solid #d9e2ea;
     border-radius: 0.65rem;
-    overflow: hidden;
+    overflow-x: auto;
 }
 
 .rptResultTable .sapMListTblHeaderCell {
