@@ -132,6 +132,11 @@ body,
     background: rgba(255, 255, 255, 0.12);
 }
 
+.rptHeroFullBadge {
+    gap: 1rem;
+    margin-bottom: 10px;
+}
+
 .rptHeroBadge .sapMObjStatusText,
 .rptHeroBadge .sapUiIcon {
     color: #fff !important;
@@ -212,6 +217,14 @@ body,
 
 .rptTechnicalPanel {
     flex: 1 1 31rem;
+}
+
+.rptTechnicalWorkspace {
+    flex-wrap: nowrap !important;
+}
+
+.rptTechnicalWorkspace > .sapMFlexItem {
+    flex: 0 1 50% !important;
 }
 
 .rptPanel > .sapMPanelWrappingDivTb,
@@ -312,6 +325,11 @@ body,
     box-shadow: inset 0 0 0 1px rgba(16, 126, 62, 0.06);
 }
 
+.rptPreviewTable .sapMListTblCellNoData,
+.rptResultTable .sapMListTblCellNoData {
+    width: 100% !important;
+}
+
 .rptResultTable .sapMObjStatusWarning {
     border-color: #f5c26b;
     background: #fff8e6;
@@ -380,6 +398,15 @@ body,
     .rptMain {
         width: 100%;
         padding: 0.75rem 0.75rem 1.5rem;
+    }
+
+    .rptTechnicalWorkspace {
+        flex-direction: column !important;
+    }
+
+    .rptTechnicalWorkspace > .sapMFlexItem {
+        flex: 1 1 100% !important;
+        width: 100% !important;
     }
 
     .rptHero {

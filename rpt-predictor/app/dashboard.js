@@ -301,7 +301,7 @@ sap.ui.define([
                             state: 'Information'
                         }).addStyleClass('rptHeroBadge')
                     ]
-                }).addStyleClass('sapUiSmallMarginBottom'),
+                }).addStyleClass('rptHeroFullBadge'),
                 new Title({ text: 'Prediction Control Center', level: 'H1' })
                     .addStyleClass('rptHeroTitle'),
                 new Text({
@@ -972,7 +972,6 @@ sap.ui.define([
         resultTable.bindItems({
             path: 'result>/rows',
             template: new ColumnListItem({
-                highlight: 'Information',
                 cells: columns.map(function (column, index) {
                  return new ObjectStatus({
                         text: '{result>c' + index + '}',
