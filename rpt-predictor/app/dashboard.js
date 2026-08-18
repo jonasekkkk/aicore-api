@@ -170,6 +170,18 @@ sap.ui.define([
     }).addStyleClass('rptResultTable');
     resultTable.setModel(resultModel, 'result');
 
+    var startRowInput = new Input({
+        placeholder: '1',
+        type: 'Number',
+        width: '100%',
+        tooltip: 'Pokud CSV obsahuje zbytečné řádky nahoře, zadejte číslo řádku, kde začínají skutečné hlavičky.',
+        liveChange: function () {
+            if (selectedFile) {
+                if (this.getValue() < 0) return; 
+                loadCsvFile(selectedFile, 're-parse');
+            }
+        }
+    });
     var downloadResultButton = new Button({
         text: 'Stáhnout aktualizované CSV',
         icon: 'sap-icon://download',
@@ -452,10 +464,23 @@ sap.ui.define([
             content: [
                 new VBox({
                     items: [
-                        uploadControl,
-                        new Text({
-                            text: 'Podporovaný formát: CSV · Doporučená velikost do 10 MB'
-                        }).addStyleClass('rptMuted')
+                        new VBox({
+                            items: [
+                                uploadControl,
+                                new Text({
+                                    text: 'Podporovaný formát: CSV · Doporučená velikost do 10 MB'
+                                }).addStyleClass('rptMuted')
+                            ]
+                        }),
+                        
+                        new VBox({
+                            items: [
+                                startRowInput,
+                                new Text({
+                                    text: 'Pokud CSV obsahuje nahoře systémová metadata (např. SAP export), zadejte číslo řádku se skutečnými názvy sloupců. Náhled dat se upraví automaticky.'
+                                }).addStyleClass('rptMuted')
+                            ]
+                        })
                     ]
                 }).addStyleClass('rptUploadBox'),
                 new FlexBox({
@@ -797,8 +822,8 @@ sap.ui.define([
         setStatus('csv', useMock ? 'Mock analýza…' : 'Live predikce…', 'Information');
 
         try {
-            var base64 = await fileToBase64(selectedFile);
-            var result = await requestAction(
+            var cleanBlob = generateCleanCsvBlob();
+            var base64 = await fileToBase64(cleanBlob);            var result = await requestAction(
                 'predictMissingData',
                 {
                     file: base64,
@@ -1106,6 +1131,7 @@ sap.ui.define([
             return;
         }
 
+        // Získáme aktuální stav řádků z výsledkového modelu (obsahuje uživatelské úpravy / predikce)
         var currentTableRows = resultModel.getProperty('/rows') || [];
         if (!currentTableRows.length) {
             MessageToast.show('Nejsou k dispozici žádná data k uložení.');
@@ -1114,17 +1140,37 @@ sap.ui.define([
 
         var headers = csvProfile.headers;
         var delimiter = csvProfile.delimiterRaw;
+        var config = getCsvConfig();
+        var indexCol = config.indexColumn;
 
-        var rowsToExport = currentTableRows.map(function (tableRow, rowIndex) {
-            var originalRow = csvProfile.rows[rowIndex] || {};
+        var updatedRowsMap = {};
+        currentTableRows.forEach(function (tableRow, tableIndex) {
+            var columns = selectResultColumns(config);
+            var colIdx = columns.indexOf(indexCol);
+            
+            if (colIdx !== -1) {
+                var indexValue = tableRow['c' + colIdx];
+                if (indexValue !== undefined) {
+                    updatedRowsMap[indexValue] = tableRow;
+                }
+            }
+        });
+
+        var rowsToExport = csvProfile.rows.map(function (originalRow) {
+            var rowKey = originalRow[indexCol];
             var updatedRow = Object.assign({}, originalRow);
 
-            headers.forEach(function (header, index) {
-                var val = tableRow['c' + index];
-                if (val !== undefined) {
-                    updatedRow[header] = val;
-                }
-            });
+            var matchedTableRow = updatedRowsMap[rowKey];
+            if (matchedTableRow) {
+                var columns = selectResultColumns(config);
+                columns.forEach(function (header, index) {
+                    var val = matchedTableRow['c' + index];
+                    if (val !== undefined) {
+                        updatedRow[header] = val;
+                    }
+                });
+            }
+
             return updatedRow;
         });
 
@@ -1141,17 +1187,18 @@ sap.ui.define([
         var originalName = selectedFile ? selectedFile.name.replace(/\.csv$/i, '') : 'export';
 
         link.href = URL.createObjectURL(blob);
-        link.download = originalName + '-reviewed.csv';
+        link.download = originalName + ' - predicted.csv';
         document.body.appendChild(link);
         link.click();
         link.remove();
+        
         window.setTimeout(function () {
             URL.revokeObjectURL(link.href);
         }, 0);
 
-        log('INFO', 'CSV', 'Revidované CSV s uživatelskými úpravami bylo staženo.', {
+        log('INFO', 'CSV', 'Kompletní CSV soubor se všemi řádky a predikcemi byl stažen.', {
             fileName: link.download,
-            rows: rowsToExport.length
+            totalRows: rowsToExport.length
         });
     }
 
@@ -1162,6 +1209,21 @@ sap.ui.define([
             || /[\r\n]/.test(textValue);
         var escaped = textValue.replace(/"/g, '""');
         return mustQuote ? '"' + escaped + '"' : escaped;
+    }
+
+    function generateCleanCsvBlob() {
+        var headers = csvProfile.headers;
+        var delimiter = csvProfile.delimiterRaw;
+
+        var csvText = [headers.map(function (header) {
+            return escapeCsvValue(header, delimiter);
+        }).join(delimiter)].concat(csvProfile.rows.map(function (row) {
+            return headers.map(function (header) {
+                return escapeCsvValue(row[header], delimiter);
+            }).join(delimiter);
+        })).join('\r\n');
+
+        return new Blob(['\uFEFF' + csvText], { type: 'text/csv;charset=utf-8' });
     }
 
     function firstDefined() {
@@ -1215,6 +1277,20 @@ sap.ui.define([
             var delimiter = detectDelimiter(text);
             var matrix = parseCsv(text, delimiter);
 
+            var startRowVal = startRowInput.getValue();
+            var startRow = parseInt(startRowVal, 10);
+
+            if (!isNaN(startRow) && startRow > 1) {
+                matrix = matrix.slice(startRow - 1);
+
+                if (matrix.length > 0) {
+                    matrix[0] = matrix[0].map(function (headerText) {
+                        return String(headerText || '').split(/\r?\n/)[0].trim();
+                    });
+                }
+                
+                log('INFO', 'CSV', 'Oříznuto. Hlavička začíná na řádku ' + startRow + ' a byla vyčištěna.');
+            }
             if (matrix.length < 2) {
                 throw new Error('CSV neobsahuje hlavičku a datové řádky.');
             }
@@ -1233,11 +1309,7 @@ sap.ui.define([
                 durationMs: Math.round(performance.now() - started),
                 rows: csvProfile.rows.length,
                 columns: csvProfile.headers.length,
-                delimiter: displayDelimiter(delimiter),
-                missingCells: csvProfile.missingCells,
-                suggestedIndexColumn: csvProfile.suggestedIndex,
-                predictionTargets: csvProfile.predictionTargets,
-                predictionCellCount: csvProfile.predictionCellCount
+                delimiter: displayDelimiter(delimiter)
             });
         } catch (error) {
             setStatus('csv', 'Neplatný soubor', 'Error');
@@ -1681,9 +1753,8 @@ sap.ui.define([
                     index += 1;
                 }
                 row.push(field);
-                if (row.some(function (value) { return value !== ''; })) {
-                    rows.push(row);
-                }
+                rows.push(row);
+                
                 row = [];
                 field = '';
             } else {

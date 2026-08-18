@@ -257,10 +257,11 @@ body,
 }
 
 .rptUploadBox {
-    padding: 1rem;
-    border: 1px dashed #8ea7bd;
-    border-radius: 0.7rem;
+    padding: 1rem .3rem 2rem .3rem;
+    border-bottom: 1px solid gray;
+    margin-bottom: 1.5rem;
     background: #f7faff;
+    gap: 1rem
 }
 
 .rptMetaChip {
