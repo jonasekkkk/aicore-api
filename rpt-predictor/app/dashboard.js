@@ -23,7 +23,9 @@ sap.ui.define([
     'sap/ui/model/json/JSONModel',
     'sap/ui/core/Item',
     'sap/ui/core/Icon',
-    'rptpredictor/result-utils'
+    'rptpredictor/result-utils',
+    'sap/m/Input',
+    'sap/m/Popover',
 ], function (
     App,
     Page,
@@ -49,7 +51,9 @@ sap.ui.define([
     JSONModel,
     Item,
     Icon,
-    ResultUtils
+    ResultUtils,
+    Input,
+    Popover,
 ) {
     'use strict';
 
@@ -868,18 +872,16 @@ sap.ui.define([
 
             columns.forEach(function (column, index) {
                 var predictionInfo = entry.predictedColumns[column];
+                var isApplied = predictionInfo && predictionInfo.applied;
+
                 mapped['c' + index] = ResultUtils.formatValue(entry.row[column]);
-                mapped['s' + index] = predictionInfo && predictionInfo.applied
-                    ? 'Success'
-                    : predictionInfo
-                        ? 'Warning'
-                        : 'None';
-                mapped['i' + index] = predictionInfo && predictionInfo.applied
-                    ? 'sap-icon://machine'
-                    : '';
+                mapped['s' + index] = isApplied ? 'Success' : 'None';
+                mapped['i' + index] = isApplied ? 'sap-icon://machine' : '';
                 mapped['t' + index] = predictionInfo
                     ? predictionInfo.tooltip
                     : ResultUtils.formatValue(entry.row[column]);
+                
+                mapped['isPred' + index] = Boolean(isApplied);
             });
 
             return mapped;
@@ -928,37 +930,18 @@ sap.ui.define([
         var targets = config.targets.map(function (target) {
             return target.name;
         });
+
         var selected = [config.indexColumn];
-        var preferredContext = [
-            'nazev_odberatele',
-            'nazev_produktu',
-            'datum_dodani',
-            'segment_odberatele',
-            'kategorie_produktu',
-            'stav_transakce'
-        ];
-        var contextLimit = Math.max(0, 8 - selected.length - targets.length);
 
-        preferredContext.concat(csvProfile.headers).some(function (column) {
-            if (
-                contextLimit > 0
-                && csvProfile.headers.includes(column)
-                && !selected.includes(column)
-                && !targets.includes(column)
-            ) {
-                selected.push(column);
-                contextLimit -= 1;
-            }
-            return contextLimit === 0;
+        var allColumns = csvProfile ? csvProfile.headers : [];
+
+        var availableContext = allColumns.filter(function (col) {
+            return col !== config.indexColumn && !targets.includes(col);
         });
 
-        targets.forEach(function (target) {
-            if (!selected.includes(target)) {
-                selected.push(target);
-            }
-        });
+        var contextColumns = availableContext.slice(0, 3);
 
-        return selected;
+        return selected.concat(contextColumns).concat(targets);
     }
 
     function rebuildResultTable(columns, targets, rows) {
@@ -979,7 +962,7 @@ sap.ui.define([
                 : new Label({ text: column });
 
             resultTable.addColumn(new Column({
-                width: isTarget ? '12rem' : column.includes('nazev') ? '14rem' : '10rem',
+                width: isTarget ? '13rem' : '11rem',
                 importance: isTarget ? 'High' : 'Medium',
                 header: header
             }));
@@ -990,17 +973,118 @@ sap.ui.define([
             path: 'result>/rows',
             template: new ColumnListItem({
                 highlight: 'Information',
-                cells: columns.map(function (_column, index) {
-                    return new ObjectStatus({
+                cells: columns.map(function (column, index) {
+                 return new ObjectStatus({
                         text: '{result>c' + index + '}',
                         state: '{result>s' + index + '}',
                         icon: '{result>i' + index + '}',
-                        tooltip: '{result>t' + index + '}'
-                    });
+                        tooltip: '{result>t' + index + '}',
+                        active: '{result>isPred' + index + '}', 
+                        press: handlePredictionClick
+                    })
+                    .data('colIndex', index) 
+                    .data('colName', column)
+                    .addStyleClass('rptNoSelect');
                 })
             }),
             templateShareable: false
         });
+    }
+
+    var oPredictionPopover = null;
+    var currentEditContext = null;
+
+    function handlePredictionClick(oEvent) {
+        var oSource = oEvent.getSource();
+        var oContext = oSource.getBindingContext('result');
+        
+        currentEditContext = {
+            path: oContext.getPath(),
+            colIndex: oSource.data('colIndex'),
+            colName: oSource.data('colName'),
+            currentValue: oContext.getProperty('c' + oSource.data('colIndex')),
+            tooltipText: oContext.getProperty('t' + oSource.data('colIndex'))
+        };
+
+        if (!oPredictionPopover) {
+            var oInfoText = new Text({ width: '100%' }).addStyleClass('sapUiTinyMarginBottom');
+            var oInput = new Input({ 
+                width: '100%', 
+                visible: false,
+                submit: function() {
+                    resultModel.setProperty(currentEditContext.path + '/c' + currentEditContext.colIndex, oInput.getValue());
+                    oPredictionPopover.close();
+                }
+            });
+            
+            var oAcceptBtn = new Button({
+                text: 'Přijmout', 
+                type: 'Emphasized',
+                press: function() {
+                    if (oInput.getVisible()) {
+                        resultModel.setProperty(currentEditContext.path + '/c' + currentEditContext.colIndex, oInput.getValue());
+                    }
+                    oPredictionPopover.close();
+                }
+            });
+
+            var oEditBtn = new Button({
+                text: 'Upravit', 
+                type: 'Default',
+                press: function() {
+                    oInput.setVisible(true);
+                    oEditBtn.setVisible(false);
+                    oAcceptBtn.setText('Uložit úpravu');
+                }
+            });
+
+            var oRejectBtn = new Button({
+                text: 'Odmítnout', 
+                type: 'Transparent',
+                press: function() {
+                    var path = currentEditContext.path;
+                    var idx = currentEditContext.colIndex;
+                    
+                    resultModel.setProperty(path + '/c' + idx, '');
+                    
+                    oPredictionPopover.close();
+                }
+            });
+
+            oPredictionPopover = new Popover({
+                title: 'Predikce umělé inteligence',
+                placement: 'Auto',
+                contentWidth: '280px',
+                content: [
+                    new VBox({
+                        items: [ oInfoText, oInput ]
+                    }).addStyleClass('sapUiSmallMargin')
+                ],
+                footer: new Toolbar({
+                    content: [
+                        oRejectBtn,
+                        new ToolbarSpacer(),
+                        oEditBtn,
+                        oAcceptBtn
+                    ]
+                })
+            });
+            
+            oPredictionPopover._oInfoText = oInfoText;
+            oPredictionPopover._oInput = oInput;
+            oPredictionPopover._oEditBtn = oEditBtn;
+            oPredictionPopover._oAcceptBtn = oAcceptBtn;
+        }
+
+        oPredictionPopover._oInfoText.setText(currentEditContext.tooltipText);
+
+        oPredictionPopover._oInput.setValue(currentEditContext.currentValue);
+        oPredictionPopover._oInput.setVisible(false);
+        
+        oPredictionPopover._oEditBtn.setVisible(true);
+        oPredictionPopover._oAcceptBtn.setText('Přijmout');
+        
+        oPredictionPopover.openBy(oSource);
     }
 
     function resetPredictionResults() {
@@ -1024,34 +1108,57 @@ sap.ui.define([
     }
 
     function downloadUpdatedCsv() {
-        if (!lastUpdatedRows || !csvProfile) {
-            MessageToast.show('Nejprve spusťte úspěšnou predikci.');
+        if (!csvProfile) {
+            MessageToast.show('Nejprve nahrajte soubor a spusťte predikci.');
             return;
         }
 
+        var currentTableRows = resultModel.getProperty('/rows') || [];
+        if (!currentTableRows.length) {
+            MessageToast.show('Nejsou k dispozici žádná data k uložení.');
+            return;
+        }
+
+        var headers = csvProfile.headers;
         var delimiter = csvProfile.delimiterRaw;
-        var csvText = [csvProfile.headers.map(function (header) {
+
+        var rowsToExport = currentTableRows.map(function (tableRow, rowIndex) {
+            var originalRow = csvProfile.rows[rowIndex] || {};
+            var updatedRow = Object.assign({}, originalRow);
+
+            headers.forEach(function (header, index) {
+                var val = tableRow['c' + index];
+                if (val !== undefined) {
+                    updatedRow[header] = val;
+                }
+            });
+            return updatedRow;
+        });
+
+        var csvText = [headers.map(function (header) {
             return escapeCsvValue(header, delimiter);
-        }).join(delimiter)].concat(lastUpdatedRows.map(function (row) {
-            return csvProfile.headers.map(function (header) {
+        }).join(delimiter)].concat(rowsToExport.map(function (row) {
+            return headers.map(function (header) {
                 return escapeCsvValue(row[header], delimiter);
             }).join(delimiter);
         })).join('\r\n');
+
         var blob = new Blob(['\uFEFF' + csvText], { type: 'text/csv;charset=utf-8' });
         var link = document.createElement('a');
-        var originalName = selectedFile.name.replace(/\.csv$/i, '');
+        var originalName = selectedFile ? selectedFile.name.replace(/\.csv$/i, '') : 'export';
 
         link.href = URL.createObjectURL(blob);
-        link.download = originalName + '-predicted.csv';
+        link.download = originalName + '-reviewed.csv';
         document.body.appendChild(link);
         link.click();
         link.remove();
         window.setTimeout(function () {
             URL.revokeObjectURL(link.href);
         }, 0);
-        log('INFO', 'CSV', 'Aktualizované CSV bylo staženo.', {
+
+        log('INFO', 'CSV', 'Revidované CSV s uživatelskými úpravami bylo staženo.', {
             fileName: link.download,
-            rows: lastUpdatedRows.length
+            rows: rowsToExport.length
         });
     }
 

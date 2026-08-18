@@ -78,11 +78,55 @@ body,
     margin-top: 1.1rem;
 }
 
+.rptConditionalInput.sapMInputBaseEditable .sapMInputBaseInner {
+    background-color: #edf9f1 !important;
+    border-color: #86d5a2 !important;
+    color: #107e3e !important;
+    font-weight: bold;
+}
+
+.rptConditionalInput.sapMInputBaseDisabled .sapMInputBaseInner,
+.rptConditionalInput:not(.sapMInputBaseEditable) .sapMInputBaseInner {
+    background-color: transparent !important;
+    border-color: transparent !important;
+    color: #32363a !important;
+    font-weight: normal;
+    padding-left: 0 !important;
+}
+
+.rptNoSelect,
+.rptNoSelect * {
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    user-select: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+    outline: none !important;
+}
+
+.rptNoSelect {
+    --sapContent_ContrastFocusColor: transparent !important;
+    --sapContent_FocusColor: transparent !important;
+    --sapField_Focus_Background: transparent !important;
+    --sapField_Focus_HelpBackground: transparent !important;
+}
+
+.rptNoSelect:active .sapMObjStatusText,
+.rptNoSelect:active .sapMObjStatusIcon,
+.rptNoSelect:active .sapUiIcon,
+.rptNoSelect.sapMObjStatusActive .sapMObjStatusText,
+.rptNoSelect.sapMObjStatusActive .sapMObjStatusIcon,
+.rptNoSelect.sapMObjStatusActive .sapUiIcon {
+    color: #107e3e !important;
+}
+
 .rptHeroBadge {
     display: inline-flex;
     width: auto !important;
+    justify-content: center;
+    align-items: center;
     margin-right: 0.5rem;
-    padding: 0.34rem 0.7rem;
+    padding: 0.7rem;
     border: 1px solid rgba(255, 255, 255, 0.32);
     border-radius: 999px;
     background: rgba(255, 255, 255, 0.12);
