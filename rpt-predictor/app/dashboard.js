@@ -823,7 +823,9 @@ sap.ui.define([
 
         try {
             var cleanBlob = generateCleanCsvBlob();
-            var base64 = await fileToBase64(cleanBlob);            var result = await requestAction(
+            var base64 = await fileToBase64(cleanBlob);
+            
+            var result = await requestAction(
                 'predictMissingData',
                 {
                     file: base64,
@@ -1131,23 +1133,19 @@ sap.ui.define([
             return;
         }
 
-        // Získáme aktuální stav řádků z výsledkového modelu (obsahuje uživatelské úpravy / predikce)
         var currentTableRows = resultModel.getProperty('/rows') || [];
         if (!currentTableRows.length) {
             MessageToast.show('Nejsou k dispozici žádná data k uložení.');
             return;
         }
 
-        var headers = csvProfile.headers;
-        var delimiter = csvProfile.delimiterRaw;
         var config = getCsvConfig();
+        var columns = selectResultColumns(config);
         var indexCol = config.indexColumn;
 
         var updatedRowsMap = {};
         currentTableRows.forEach(function (tableRow, tableIndex) {
-            var columns = selectResultColumns(config);
             var colIdx = columns.indexOf(indexCol);
-            
             if (colIdx !== -1) {
                 var indexValue = tableRow['c' + colIdx];
                 if (indexValue !== undefined) {
@@ -1162,7 +1160,6 @@ sap.ui.define([
 
             var matchedTableRow = updatedRowsMap[rowKey];
             if (matchedTableRow) {
-                var columns = selectResultColumns(config);
                 columns.forEach(function (header, index) {
                     var val = matchedTableRow['c' + index];
                     if (val !== undefined) {
@@ -1174,10 +1171,16 @@ sap.ui.define([
             return updatedRow;
         });
 
-        var csvText = [headers.map(function (header) {
+        var exportHeaders = csvProfile.headers.filter(function(h) { return h !== '__row_id__'; });
+        rowsToExport.forEach(function(row) {
+            delete row['__row_id__'];
+        });
+
+        var delimiter = csvProfile.delimiterRaw;
+        var csvText = [exportHeaders.map(function (header) {
             return escapeCsvValue(header, delimiter);
         }).join(delimiter)].concat(rowsToExport.map(function (row) {
-            return headers.map(function (header) {
+            return exportHeaders.map(function (header) {
                 return escapeCsvValue(row[header], delimiter);
             }).join(delimiter);
         })).join('\r\n');
@@ -1196,7 +1199,7 @@ sap.ui.define([
             URL.revokeObjectURL(link.href);
         }, 0);
 
-        log('INFO', 'CSV', 'Kompletní CSV soubor se všemi řádky a predikcemi byl stažen.', {
+        log('INFO', 'CSV', 'Kompletní CSV soubor se všemi řádky byl stažen.', {
             fileName: link.download,
             totalRows: rowsToExport.length
         });
@@ -1282,21 +1285,51 @@ sap.ui.define([
 
             if (!isNaN(startRow) && startRow > 1) {
                 matrix = matrix.slice(startRow - 1);
-
+                
                 if (matrix.length > 0) {
                     matrix[0] = matrix[0].map(function (headerText) {
                         return String(headerText || '').split(/\r?\n/)[0].trim();
                     });
                 }
                 
-                log('INFO', 'CSV', 'Oříznuto. Hlavička začíná na řádku ' + startRow + ' a byla vyčištěna.');
+                log('INFO', 'CSV', 'Oříznuto. Hlavička začíná na řádku ' + startRow);
             }
+            matrix = matrix.filter(function(row, index) {
+                if (index === 0) return true;
+                return row.some(function(cell) { return String(cell).trim() !== ''; });
+            });
+
             if (matrix.length < 2) {
                 throw new Error('CSV neobsahuje hlavičku a datové řádky.');
             }
 
             selectedFile = file;
             csvProfile = profileCsv(matrix, delimiter);
+
+            var indexCol = indexSelect.getSelectedKey() || csvProfile.suggestedIndex;
+            
+            if (indexCol === '__row_id__' && csvProfile.headers.length > 1) {
+                indexCol = csvProfile.headers.find(function(h) { return h !== '__row_id__'; });
+            }
+
+            var values = csvProfile.rows.map(function(r) { return r[indexCol]; });
+            var uniqueValues = new Set(values);
+            var isUnique = (uniqueValues.size === values.length);
+
+            if (!isUnique) {
+                log('INFO', 'CSV', 'Index "' + indexCol + '" obsahuje duplicity. Generuji unikátní ID.');
+                
+                matrix[0].unshift('__row_id__');
+                for (var rIdx = 1; rIdx < matrix.length; rIdx++) {
+                    matrix[rIdx].unshift(String(rIdx));
+                }
+
+                csvProfile = profileCsv(matrix, delimiter);
+                csvProfile.suggestedIndex = '__row_id__';
+            } else {
+                csvProfile.suggestedIndex = indexCol;
+            }
+
             updateCsvUi();
             resetPredictionResults();
             updateRequestPreview();
