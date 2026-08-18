@@ -121,7 +121,7 @@ body,
 }
 
 .rptHeroBadge {
-    display: inline-flex;
+    display: flex !important;
     width: auto !important;
     justify-content: center;
     align-items: center;
@@ -398,6 +398,19 @@ body,
     .rptMain {
         width: 100%;
         padding: 0.75rem 0.75rem 1.5rem;
+    }
+
+    .rptResponsiveBtn .sapMBtnContent {
+        display: none !important;
+    }
+
+    .rptResponsiveBtn .sapMBtnIcon {
+        padding-right: 0 !important;
+        margin-right: 0 !important;
+    }
+    
+    .rptResponsiveBtn .sapMBtnInner {
+        padding: 0 0.5rem !important;
     }
 
     .rptTechnicalWorkspace {

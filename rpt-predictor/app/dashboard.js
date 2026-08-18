@@ -176,7 +176,7 @@ sap.ui.define([
         type: 'Emphasized',
         enabled: '{/result/ready}',
         press: downloadUpdatedCsv
-    });
+    }).addStyleClass('rptResponsiveBtn');
 
     var uploadControl = new FileUploader({
         width: '100%',
@@ -235,13 +235,7 @@ sap.ui.define([
                 new Icon({ src: 'sap-icon://business-objects-experience' })
                     .addStyleClass('rptBrandMark'),
                 new Title({ text: 'RPT Predictor', level: 'H2' }),
-                new Text({ text: 'Diagnostics & Data Lab' }).addStyleClass('rptMuted'),
                 new ToolbarSpacer(),
-                new ObjectStatus({
-                    text: 'SAP BTP / BAS',
-                    icon: 'sap-icon://cloud',
-                    state: 'Information'
-                }),
                 new Button({
                     icon: 'sap-icon://synchronize',
                     type: 'Transparent',
