@@ -125,6 +125,24 @@ sap.ui.define([
         }
     });
 
+    indexSelect.attachChange(function () {
+        if (!selectedFile) return;
+
+        var chosenCol = this.getSelectedKey();
+        if (!csvProfile) return;
+
+        var values = csvProfile.rows.map(function(r) { return r[chosenCol]; });
+        var uniqueValues = new Set(values);
+        var isUnique = (uniqueValues.size === values.length);
+
+        if (!isUnique) {
+            MessageToast.show('Pozor: Sloupec "' + chosenCol + '" obsahuje duplicity. Pro bezpečný chod predikcí bude na pozadí použito interní ID.');
+            log('WARN', 'CSV', 'Uživatel vybral duplicitní index: ' + chosenCol + '. Aplikuji __row_id__.');
+        }
+
+        loadCsvFile(selectedFile, 'index-change');
+    });
+
     var detectedTargetsArea = new TextArea({
         value: 'Nejprve načtěte CSV.',
         editable: false,
@@ -1308,8 +1326,8 @@ sap.ui.define([
 
             var indexCol = indexSelect.getSelectedKey() || csvProfile.suggestedIndex;
             
-            if (indexCol === '__row_id__' && csvProfile.headers.length > 1) {
-                indexCol = csvProfile.headers.find(function(h) { return h !== '__row_id__'; });
+            if (indexCol === '__row_id__') {
+                indexCol = csvProfile.headers.find(function(h) { return h !== '__row_id__'; }) || csvProfile.headers[0];
             }
 
             var values = csvProfile.rows.map(function(r) { return r[indexCol]; });
@@ -1317,7 +1335,7 @@ sap.ui.define([
             var isUnique = (uniqueValues.size === values.length);
 
             if (!isUnique) {
-                log('INFO', 'CSV', 'Index "' + indexCol + '" obsahuje duplicity. Generuji unikátní ID.');
+                log('INFO', 'CSV', 'Zvolený index "' + indexCol + '" obsahuje duplicity. Aplikuji interní __row_id__.');
                 
                 matrix[0].unshift('__row_id__');
                 for (var rIdx = 1; rIdx < matrix.length; rIdx++) {
