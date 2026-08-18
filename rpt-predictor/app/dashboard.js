@@ -1018,7 +1018,7 @@ sap.ui.define([
             });
             
             var oAcceptBtn = new Button({
-                text: 'Přijmout', 
+                text: 'Ok', 
                 type: 'Emphasized',
                 press: function() {
                     if (oInput.getVisible()) {
@@ -1082,7 +1082,7 @@ sap.ui.define([
         oPredictionPopover._oInput.setVisible(false);
         
         oPredictionPopover._oEditBtn.setVisible(true);
-        oPredictionPopover._oAcceptBtn.setText('Přijmout');
+        oPredictionPopover._oAcceptBtn.setText('Ok');
         
         oPredictionPopover.openBy(oSource);
     }
@@ -1336,7 +1336,8 @@ sap.ui.define([
                 mapped['c' + index] = val;
                 mapped['s' + index] = isPredict ? 'Success' : 'None';
                 mapped['i' + index] = isPredict ? 'sap-icon://pending' : '';
-            });
+                mapped['t' + index] = isPredict ? 'Detekce chybějící buňky' : '';
+            })
             return mapped;
         });
 
@@ -1348,7 +1349,8 @@ sap.ui.define([
                     return new ObjectStatus({
                         text: '{preview>c' + index + '}',
                         state: '{preview>s' + index + '}',
-                        icon: '{preview>i' + index + '}'
+                        icon: '{preview>i' + index + '}',
+                        tooltip: '{preview>t' + index + '}'
                     });
                 })
             }),
