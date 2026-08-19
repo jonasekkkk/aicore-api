@@ -1162,7 +1162,7 @@ sap.ui.define([
         var indexCol = config.indexColumn;
 
         var updatedRowsMap = {};
-        currentTableRows.forEach(function (tableRow, tableIndex) {
+        currentTableRows.forEach(function (tableRow) {
             var colIdx = columns.indexOf(indexCol);
             if (colIdx !== -1) {
                 var indexValue = tableRow['c' + colIdx];
@@ -1189,19 +1189,39 @@ sap.ui.define([
             return updatedRow;
         });
 
-        var exportHeaders = csvProfile.headers.filter(function(h) { return h !== '__row_id__'; });
         rowsToExport.forEach(function(row) {
             delete row['__row_id__'];
         });
 
+        var exportHeaders = (window.originalHeaderRow && window.originalHeaderRow.length > 0) 
+            ? window.originalHeaderRow 
+            : csvProfile.headers.filter(function(h) { return h !== '__row_id__'; });
+
         var delimiter = csvProfile.delimiterRaw;
-        var csvText = [exportHeaders.map(function (header) {
+        var csvParts = [];
+
+        if (window.savedSkippedRows && window.savedSkippedRows.length > 0) {
+            window.savedSkippedRows.forEach(function (skippedRow) {
+                csvParts.push(skippedRow.map(function (cell) {
+                    return escapeCsvValue(cell, delimiter);
+                }).join(delimiter));
+            });
+        }
+
+        csvParts.push(exportHeaders.map(function (header) {
             return escapeCsvValue(header, delimiter);
-        }).join(delimiter)].concat(rowsToExport.map(function (row) {
-            return exportHeaders.map(function (header) {
-                return escapeCsvValue(row[header], delimiter);
-            }).join(delimiter);
-        })).join('\r\n');
+        }).join(delimiter));
+
+        var cleanHeaders = csvProfile.headers.filter(function(h) { return h !== '__row_id__'; });
+        
+        rowsToExport.forEach(function (row) {
+            csvParts.push(exportHeaders.map(function (header, index) {
+                var cleanKey = cleanHeaders[index];
+                return escapeCsvValue(row[cleanKey], delimiter);
+            }).join(delimiter));
+        });
+
+        var csvText = csvParts.join('\r\n');
 
         var blob = new Blob(['\uFEFF' + csvText], { type: 'text/csv;charset=utf-8' });
         var link = document.createElement('a');
@@ -1217,7 +1237,7 @@ sap.ui.define([
             URL.revokeObjectURL(link.href);
         }, 0);
 
-        log('INFO', 'CSV', 'Kompletní CSV soubor se všemi řádky byl stažen.', {
+        log('INFO', 'CSV', 'Kompletní CSV soubor byl stažen ve správných sloupcích.', {
             fileName: link.download,
             totalRows: rowsToExport.length
         });
@@ -1301,17 +1321,26 @@ sap.ui.define([
             var startRowVal = startRowInput.getValue();
             var startRow = parseInt(startRowVal, 10);
 
+            window.savedSkippedRows = [];
+            window.originalHeaderRow = [];
+
             if (!isNaN(startRow) && startRow > 1) {
+                window.savedSkippedRows = matrix.slice(0, startRow - 1);
                 matrix = matrix.slice(startRow - 1);
                 
                 if (matrix.length > 0) {
+                    window.originalHeaderRow = matrix[0].slice();
+                    
                     matrix[0] = matrix[0].map(function (headerText) {
                         return String(headerText || '').split(/\r?\n/)[0].trim();
                     });
                 }
                 
-                log('INFO', 'CSV', 'Oříznuto. Hlavička začíná na řádku ' + startRow);
+                log('INFO', 'CSV', 'Oříznuto. Uloženo ' + window.savedSkippedRows.length + ' úvodních řádků.');
+            } else if (matrix.length > 0) {
+                window.originalHeaderRow = matrix[0].slice();
             }
+
             matrix = matrix.filter(function(row, index) {
                 if (index === 0) return true;
                 return row.some(function(cell) { return String(cell).trim() !== ''; });
@@ -1324,18 +1353,12 @@ sap.ui.define([
             selectedFile = file;
             csvProfile = profileCsv(matrix, delimiter);
 
-            var indexCol = indexSelect.getSelectedKey() || csvProfile.suggestedIndex;
-            
-            if (indexCol === '__row_id__') {
-                indexCol = csvProfile.headers.find(function(h) { return h !== '__row_id__'; }) || csvProfile.headers[0];
-            }
-
+            var indexCol = csvProfile.suggestedIndex;
             var values = csvProfile.rows.map(function(r) { return r[indexCol]; });
-            var uniqueValues = new Set(values);
-            var isUnique = (uniqueValues.size === values.length);
+            var isUnique = (new Set(values).size === values.length);
 
             if (!isUnique) {
-                log('INFO', 'CSV', 'Zvolený index "' + indexCol + '" obsahuje duplicity. Aplikuji interní __row_id__.');
+                log('INFO', 'CSV', 'Soubor neobsahuje unikátní sloupec. Generuji automatické __row_id__.');
                 
                 matrix[0].unshift('__row_id__');
                 for (var rIdx = 1; rIdx < matrix.length; rIdx++) {
@@ -1344,8 +1367,6 @@ sap.ui.define([
 
                 csvProfile = profileCsv(matrix, delimiter);
                 csvProfile.suggestedIndex = '__row_id__';
-            } else {
-                csvProfile.suggestedIndex = indexCol;
             }
 
             updateCsvUi();
