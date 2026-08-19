@@ -26,6 +26,9 @@ sap.ui.define([
     'rptpredictor/result-utils',
     'sap/m/Input',
     'sap/m/Popover',
+    'sap/m/List',
+    'sap/m/StandardListItem',
+    'sap/m/ScrollContainer'
 ], function (
     App,
     Page,
@@ -54,6 +57,9 @@ sap.ui.define([
     ResultUtils,
     Input,
     Popover,
+    List,
+    StandardListItem,
+    ScrollContainer
 ) {
     'use strict';
 
@@ -117,30 +123,58 @@ sap.ui.define([
     var lastUpdatedRows = null;
     var logEntries = [];
 
+    var targetList = new List({
+        mode: 'MultiSelect',
+        includeItemInSelection: true,
+        noDataText: 'Nejprve načtěte CSV soubor...',
+        selectionChange: function () {
+            updateRequestPreview();
+        }
+    }).addStyleClass('rptTargetSummary');
+
+    var targetListContainer = new ScrollContainer({
+        height: '11rem',
+        width: '100%',
+        vertical: true,
+        horizontal: false,
+        content: [targetList]
+    }).addStyleClass('rptTargetSummary');
+
+    var targetPopover = new Popover({
+        title: 'Vyberte sloupce k predikci',
+        placement: 'Bottom',
+        contentWidth: '350px',
+        content: [targetList]
+    });
+
+    var targetSelectButton = new Button({
+        text: 'Vyberte sloupce...',
+        icon: 'sap-icon://slim-arrow-down',
+        iconFirst: false,
+        width: '100%',
+        press: function (oEvent) {
+            targetPopover.openBy(oEvent.getSource());
+        }
+    }).addStyleClass('rptTargetSummary');
+
+    function updateTargetButtonText() {
+        var count = targetList.getSelectedItems().length;
+        var total = targetList.getItems().length;
+        
+        if (total === 0) {
+            targetSelectButton.setText('Žádná data k predikci');
+        } else if (count === total) {
+            targetSelectButton.setText('Všechny sloupce (' + total + ')');
+        } else {
+            targetSelectButton.setText('Vybráno: ' + count + ' z ' + total);
+        }
+    }
     var indexSelect = new Select({
         width: '100%',
         change: function () {
             resetPredictionResults();
             updateRequestPreview();
         }
-    });
-
-    indexSelect.attachChange(function () {
-        if (!selectedFile) return;
-
-        var chosenCol = this.getSelectedKey();
-        if (!csvProfile) return;
-
-        var values = csvProfile.rows.map(function(r) { return r[chosenCol]; });
-        var uniqueValues = new Set(values);
-        var isUnique = (uniqueValues.size === values.length);
-
-        if (!isUnique) {
-            MessageToast.show('Pozor: Sloupec "' + chosenCol + '" obsahuje duplicity. Pro bezpečný chod predikcí bude na pozadí použito interní ID.');
-            log('WARN', 'CSV', 'Uživatel vybral duplicitní index: ' + chosenCol + '. Aplikuji __row_id__.');
-        }
-
-        loadCsvFile(selectedFile, 'index-change');
     });
 
     var detectedTargetsArea = new TextArea({
@@ -421,10 +455,11 @@ sap.ui.define([
         return new FlexBox({
             width: '100%',
             wrap: 'Wrap',
-            alignItems: 'Start',
+            alignItems: 'Stretch',
             items: [
                 createDataPanel(),
-                createControlPanel()
+                createControlPanel(),
+                createTargetPanel()
             ]
         }).addStyleClass('rptWorkspace rptPrimaryWorkspace');
     }
@@ -433,36 +468,30 @@ sap.ui.define([
         return new Panel({
             headerToolbar: panelToolbar(
                 'Konfigurace CSV requestu',
-                'sap-icon://activity-2'
+                'sap-icon://action-settings'
             ),
             content: [
-                new FlexBox({
-                    wrap: 'Wrap',
+                new VBox({
                     items: [
                         createField('Indexový sloupec', indexSelect),
-                        createField(
-                            'Automaticky nalezené cíle',
-                            detectedTargetsArea,
-                            'rptFieldWide'
-                        )
+                        new FlexBox({
+                            wrap: 'Wrap',
+                            items: [
+                                new Button({
+                                    text: 'Analyzovat CSV — mock',
+                                    icon: 'sap-icon://inspect',
+                                    press: runCsvMock
+                                }).addStyleClass('sapUiSmallMarginEnd sapUiSmallMarginBottom'),
+                                new Button({
+                                    text: 'Predikovat CSV — live',
+                                    icon: 'sap-icon://activate',
+                                    type: 'Emphasized',
+                                    press: runCsvLive
+                                }).addStyleClass('sapUiSmallMarginBottom')
+                            ]
+                        }).addStyleClass('rptSpacerTop')
                     ]
-                }).addStyleClass('rptFieldRow rptSpacerTop'),
-                new FlexBox({
-                    wrap: 'Wrap',
-                    items: [
-                        new Button({
-                            text: 'Analyzovat CSV — mock',
-                            icon: 'sap-icon://inspect',
-                            press: runCsvMock
-                        }),
-                        new Button({
-                            text: 'Predikovat CSV — live',
-                            icon: 'sap-icon://activate',
-                            type: 'Emphasized',
-                            press: runCsvLive
-                        })
-                    ]
-                }).addStyleClass('rptButtonRow rptSpacerTop')
+                }).addStyleClass('rptFieldRow sapUiSmallMarginTop')
             ]
         }).addStyleClass('rptPanel rptControlPanel');
     }
@@ -517,6 +546,19 @@ sap.ui.define([
                 previewTable
             ]
         }).addStyleClass('rptPanel rptDataPanel');
+    }
+
+    function createTargetPanel() {
+        return new Panel({
+            headerToolbar: panelToolbar(
+                'Cílové sloupce (k predikci)',
+                'sap-icon://list'
+            ),
+            content: [
+                targetList
+            ],
+            layoutData: new sap.m.FlexItemData({ growFactor: 1, minWidth: '300px' })
+        }).addStyleClass('rptPanel');
     }
 
     function createResultPanel() {
@@ -1270,7 +1312,12 @@ sap.ui.define([
             return escapeCsvValue(header, delimiter);
         }).join(delimiter)].concat(csvProfile.rows.map(function (row) {
             return safeHeaders.map(function (header) {
-                return escapeCsvValue(row[header], delimiter);
+                var val = row[header];
+                if (!targetNames.includes(header) && isPredictionValue(val)) {
+                    return escapeCsvValue('-', delimiter); 
+                }
+
+                return escapeCsvValue(val, delimiter);
             }).join(delimiter);
         })).join('\r\n');
 
@@ -1460,15 +1507,36 @@ sap.ui.define([
     }
 
     function updateTargetSummary() {
+        targetList.removeAllItems();
+
         if (!csvProfile || !csvProfile.predictionTargets.length) {
-            detectedTargetsArea.setValue('V souboru nebyly nalezeny žádné prázdné buňky k predikci.');
             return;
         }
 
-        detectedTargetsArea.setValue(csvProfile.predictionTargets.map(function (target) {
+        csvProfile.predictionTargets.forEach(function (target) {
             var taskLabel = target.taskType === 'regression' ? 'regrese' : 'klasifikace';
-            return target.name + ' · ' + taskLabel + ' · ' + target.predictionCellCount + '× prázdných';
-        }).join('\n'));
+            var missingCount = target.predictionCellCount;
+            
+            var statusState = 'None';
+            if (missingCount > 100) {
+                statusState = 'Error';
+            } else if (missingCount > 50) {
+                statusState = 'Warning';
+            } else {
+                statusState = 'Success';
+            }
+
+            var item = new StandardListItem({
+                title: target.name,
+                description: 'Typ: ' + taskLabel,
+                info: missingCount + '× prázdných',
+                infoState: statusState,
+                highlight: statusState
+            }).data('key', target.name).addStyleClass('sapUiTinyMarginTopBottom');
+
+            targetList.addItem(item);
+            targetList.setSelectedItem(item, true);
+        });
     }
 
     function setCsvReadyStatus() {
@@ -1609,13 +1677,21 @@ sap.ui.define([
     }
 
     function getCsvConfig() {
+        var selectedItems = targetList.getSelectedItems();
+        var selectedKeys = selectedItems.map(function(item) {
+            return item.data('key');
+        });
+        
+        var activeTargets = csvProfile ? csvProfile.predictionTargets.filter(function (target) {
+            return selectedKeys.includes(target.name);
+        }) : [];
+
         return {
             indexColumn: indexSelect.getSelectedKey(),
             predictionPlaceholder: '',
-            targets: csvProfile ? csvProfile.predictionTargets : []
+            targets: activeTargets
         };
     }
-
     async function requestAction(actionName, body, label) {
         var url = '/odata/v4/predictor/' + actionName;
         var started = performance.now();
