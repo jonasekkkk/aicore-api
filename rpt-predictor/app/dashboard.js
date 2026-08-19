@@ -1383,10 +1383,25 @@ sap.ui.define([
         });
 
         indexSelect.removeAllItems();
-        csvProfile.headers.forEach(function (header) {
-            indexSelect.addItem(new Item({ key: header, text: header }));
+            csvProfile.headers.forEach(function (header) {
+            if (header === '__row_id__') {
+                return;
+            }
+            var values = csvProfile.rows.map(function (r) {
+                return r[header];
+            });
+            var isUnique = (new Set(values).size === values.length);
+
+            if (isUnique) {
+                indexSelect.addItem(new Item({ key: header, text: header }));
+            }
         });
-        indexSelect.setSelectedKey(csvProfile.suggestedIndex);
+
+        if (csvProfile.headers.includes('__row_id__')) {
+            indexSelect.addItem(new Item({ key: '__row_id__', text: 'Automatické ID (__row_id__)' }));
+        }
+
+        indexSelect.setSelectedKey(csvProfile.suggestedIndex);        
         updateTargetSummary();
         rebuildPreviewTable();
     }
