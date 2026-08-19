@@ -509,9 +509,9 @@ sap.ui.define([
                         createMetaChip('Řádky', '/file/rows'),
                         createMetaChip('Sloupce', '/file/columns'),
                         createMetaChip('Oddělovač', '/file/delimiter'),
-                        createMetaChip('Prázdné buňky', '/file/missing'),
+                        createMetaChip('Celkem prázdných', '/file/missing'),
                         createMetaChip('Cílové sloupce', '/file/targets'),
-                        createMetaChip('Prázdné buňky', '/file/predictionCells')
+                        createMetaChip('K predikci', '/file/predictionCells')
                     ]
                 }).addStyleClass('rptMetaRow rptSpacerTop sapUiSmallMarginBottom'),
                 previewTable
@@ -840,7 +840,7 @@ sap.ui.define([
         setStatus('csv', useMock ? 'Mock analýza…' : 'Live predikce…', 'Information');
 
         try {
-            var cleanBlob = generateCleanCsvBlob();
+            var cleanBlob = generateCleanCsvBlob(config); 
             var base64 = await fileToBase64(cleanBlob);
             
             var result = await requestAction(
@@ -1252,13 +1252,36 @@ sap.ui.define([
         return mustQuote ? '"' + escaped + '"' : escaped;
     }
 
-    function generateCleanCsvBlob() {
+    function generateCleanCsvBlob(config) {
         var headers = csvProfile.headers;
         var delimiter = csvProfile.delimiterRaw;
+        
+        var MAX_ROWS = 512;
+        var targetNames = config.targets.map(function(t) { return t.name || t.column; });
+
+        var rowsToPredict = csvProfile.rows.filter(function(row) {
+            return targetNames.some(function(key) { 
+                return isPredictionValue(row[key]); 
+            });
+        });
+
+        var contextRows = csvProfile.rows.filter(function(row) {
+            return !targetNames.some(function(key) { 
+                return isPredictionValue(row[key]); 
+            });
+        });
+
+        var payloadRows = [];
+        if (rowsToPredict.length >= MAX_ROWS) {
+            payloadRows = rowsToPredict.slice(0, MAX_ROWS);
+        } else {
+            var neededContext = MAX_ROWS - rowsToPredict.length;
+            payloadRows = rowsToPredict.concat(contextRows.slice(0, neededContext));
+        }
 
         var csvText = [headers.map(function (header) {
             return escapeCsvValue(header, delimiter);
-        }).join(delimiter)].concat(csvProfile.rows.map(function (row) {
+        }).join(delimiter)].concat(payloadRows.map(function (row) {
             return headers.map(function (header) {
                 return escapeCsvValue(row[header], delimiter);
             }).join(delimiter);
@@ -1318,6 +1341,7 @@ sap.ui.define([
             var delimiter = detectDelimiter(text);
             var matrix = parseCsv(text, delimiter);
 
+            // --- 1. MANUÁLNÍ OŘÍZNUTÍ PODLE UŽIVATELE + ULOŽENÍ ORIGINÁLŮ ---
             var startRowVal = startRowInput.getValue();
             var startRow = parseInt(startRowVal, 10);
 
@@ -1367,6 +1391,28 @@ sap.ui.define([
 
                 csvProfile = profileCsv(matrix, delimiter);
                 csvProfile.suggestedIndex = '__row_id__';
+            }
+
+            if (csvProfile && csvProfile.predictionTargets) {
+                csvProfile.predictionTargets = csvProfile.predictionTargets.filter(function(target) {
+                    var colKey = target.name || target.column; 
+                    var filledCount = csvProfile.rows.filter(function(r) {
+                        var val = r[colKey];
+                        return val !== undefined && val !== null && String(val).trim() !== '';
+                    }).length;
+                    return filledCount > 0;
+                });
+
+                var trueMissingCount = 0;
+                csvProfile.predictionTargets.forEach(function(target) {
+                    var colKey = target.name || target.column;
+                    csvProfile.rows.forEach(function(row) {
+                        if (isPredictionValue(row[colKey])) {
+                            trueMissingCount++;
+                        }
+                    });
+                });
+                csvProfile.predictionCellCount = trueMissingCount;
             }
 
             updateCsvUi();
@@ -1463,16 +1509,22 @@ sap.ui.define([
             }));
         });
 
+        var validTargetNames = csvProfile.predictionTargets.map(function(t) {
+            return t.column || t.name;
+        });
+
         var previewSource = csvProfile.rows.slice(0, 5);
         csvProfile.rows.filter(function (row) {
             return csvProfile.predictionTargets.some(function (target) {
-                return isPredictionValue(row[target.name]);
+                var targetName = target.column || target.name;
+                return isPredictionValue(row[targetName]);
             });
         }).forEach(function (row) {
             if (previewSource.length < 10 && !previewSource.includes(row)) {
                 previewSource.push(row);
             }
         });
+        
         csvProfile.rows.forEach(function (row) {
             if (previewSource.length < 10 && !previewSource.includes(row)) {
                 previewSource.push(row);
@@ -1483,7 +1535,8 @@ sap.ui.define([
             var mapped = {};
             columns.forEach(function (header, index) {
                 var val = row[header];
-                var isPredict = isPredictionValue(val);
+                
+                var isPredict = isPredictionValue(val) && validTargetNames.includes(header);
                 
                 mapped['c' + index] = val;
                 mapped['s' + index] = isPredict ? 'Success' : 'None';
