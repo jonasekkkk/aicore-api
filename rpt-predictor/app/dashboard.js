@@ -1253,36 +1253,23 @@ sap.ui.define([
     }
 
     function generateCleanCsvBlob(config) {
-        var headers = csvProfile.headers;
+        var originalHeaders = csvProfile.headers;
         var delimiter = csvProfile.delimiterRaw;
-        
-        var MAX_ROWS = 512;
         var targetNames = config.targets.map(function(t) { return t.name || t.column; });
 
-        var rowsToPredict = csvProfile.rows.filter(function(row) {
-            return targetNames.some(function(key) { 
-                return isPredictionValue(row[key]); 
+        var safeHeaders = originalHeaders.filter(function(header) {
+            if (header === config.indexColumn) return true;
+            if (targetNames.includes(header)) return true;
+            
+            return csvProfile.rows.some(function(row) {
+                return !isPredictionValue(row[header]);
             });
         });
 
-        var contextRows = csvProfile.rows.filter(function(row) {
-            return !targetNames.some(function(key) { 
-                return isPredictionValue(row[key]); 
-            });
-        });
-
-        var payloadRows = [];
-        if (rowsToPredict.length >= MAX_ROWS) {
-            payloadRows = rowsToPredict.slice(0, MAX_ROWS);
-        } else {
-            var neededContext = MAX_ROWS - rowsToPredict.length;
-            payloadRows = rowsToPredict.concat(contextRows.slice(0, neededContext));
-        }
-
-        var csvText = [headers.map(function (header) {
+        var csvText = [safeHeaders.map(function (header) {
             return escapeCsvValue(header, delimiter);
-        }).join(delimiter)].concat(payloadRows.map(function (row) {
-            return headers.map(function (header) {
+        }).join(delimiter)].concat(csvProfile.rows.map(function (row) {
+            return safeHeaders.map(function (header) {
                 return escapeCsvValue(row[header], delimiter);
             }).join(delimiter);
         })).join('\r\n');
@@ -1341,7 +1328,6 @@ sap.ui.define([
             var delimiter = detectDelimiter(text);
             var matrix = parseCsv(text, delimiter);
 
-            // --- 1. MANUÁLNÍ OŘÍZNUTÍ PODLE UŽIVATELE + ULOŽENÍ ORIGINÁLŮ ---
             var startRowVal = startRowInput.getValue();
             var startRow = parseInt(startRowVal, 10);
 
